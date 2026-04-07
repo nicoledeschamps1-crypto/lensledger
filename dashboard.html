@@ -913,8 +913,7 @@
   // Don't redirect immediately — give Supabase time to process OAuth tokens
   let authResolved = false;
 
-  sb.auth.onAuthStateChange((event, session) => {
-    console.log('Auth event:', event, 'session:', !!session);
+  sb.auth.onAuthStateChange(async (event, session) => {
     if (authResolved) return;
 
     if (event === 'SIGNED_IN' && session) {
