@@ -3,9 +3,13 @@
 // ═══════════════════════════════════════════════════════════════
 
 let _onboardingStep = 0;
+let _onboardingChecked = false;
 const ONBOARDING_STEPS = 4;
 
 async function checkOnboarding() {
+  if (_onboardingChecked) return;
+  _onboardingChecked = true;
+
   const user = await getUser();
   if (!user) return;
 
