@@ -28,6 +28,17 @@ function validateFileType(file) {
   return ALLOWED_UPLOAD_TYPES.includes(file.type) || allowedExts.includes(ext);
 }
 
+// ─── Access Control ─────────────────────────────────────────
+
+const ALLOWED_EMAILS = [
+  'nicole.deschamps1@gmail.com',
+  'sabrinampalko@gmail.com'
+];
+
+function isAllowedUser(email) {
+  return ALLOWED_EMAILS.includes(email.toLowerCase());
+}
+
 // ─── Auth Helpers ───────────────────────────────────────────
 
 async function getSession() {

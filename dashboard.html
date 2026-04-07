@@ -919,6 +919,12 @@
     if (authResolved) return;
 
     if (event === 'SIGNED_IN' && session) {
+      // Block unauthorized users
+      if (!isAllowedUser(session.user.email)) {
+        await sb.auth.signOut();
+        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:Inter,sans-serif;color:#e8e8ed;background:#131318;text-align:center;padding:24px;"><div><h1 style="font-size:24px;margin-bottom:12px;">Access Restricted</h1><p style="color:#9898a8;">This app is private. Contact the owner for access.</p><br><a href="/index.html" style="color:#7c6df0;">Back to sign in</a></div></div>';
+        return;
+      }
       authResolved = true;
       const _overlay = document.getElementById('authLoadingOverlay'); if (_overlay) _overlay.remove();
       const user = session.user;
@@ -945,6 +951,12 @@
     }
 
     if (event === 'INITIAL_SESSION' && session) {
+      // Block unauthorized users
+      if (!isAllowedUser(session.user.email)) {
+        await sb.auth.signOut();
+        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:Inter,sans-serif;color:#e8e8ed;background:#131318;text-align:center;padding:24px;"><div><h1 style="font-size:24px;margin-bottom:12px;">Access Restricted</h1><p style="color:#9898a8;">This app is private. Contact the owner for access.</p><br><a href="/index.html" style="color:#7c6df0;">Back to sign in</a></div></div>';
+        return;
+      }
       authResolved = true;
       const _overlay = document.getElementById('authLoadingOverlay'); if (_overlay) _overlay.remove();
       // Already logged in from a previous visit
