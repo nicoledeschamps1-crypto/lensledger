@@ -325,7 +325,7 @@ function renderCategoryTotals() {
           <span class="category-icon" style="background:${c.color}22;color:${c.color}">${escapeHtml(c.icon)}</span>
           <div class="category-total-info">
             <strong>${escapeHtml(c.name)}</strong>
-            <span>Running total for April</span>
+            <span>Running total for ${new Date().toLocaleDateString('en-US', { month: 'long' })}</span>
           </div>
           <span class="mono" style="color:${c.color}"><strong>$${c.total.toFixed(2)}</strong></span>
         </div>
@@ -551,6 +551,48 @@ async function importCSV(file) {
 
   alert(`Imported ${rows.length} transactions! Categorize them in the review flow.`);
   await loadTransactions();
+}
+
+// ─── Standalone Receipt Upload (no transaction yet) ────────
+
+async function handleStandaloneReceipt(input) {
+  if (!input.files.length) return;
+  const user = await getUser();
+  if (!user) return;
+
+  const file = input.files[0];
+  if (!validateFileType(file)) {
+    alert('Only images and PDFs are allowed.');
+    return;
+  }
+
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const path = `${user.id}/unmatched/${Date.now()}-${safeName}`;
+
+  const { error } = await sb.storage
+    .from('receipts')
+    .upload(path, file, { contentType: file.type || 'application/octet-stream', upsert: false });
+
+  if (error) {
+    console.error('Receipt upload failed:', error.message);
+    alert('Failed to upload receipt: ' + error.message);
+    return;
+  }
+
+  alert('Receipt uploaded! You can match it to a transaction later.');
+  input.value = '';
+}
+
+// ─── CSV Import Handler ────────────────────────────────────
+
+async function handleCSVImport(input) {
+  if (!input.files.length) return;
+  const file = input.files[0];
+  await importCSV(file);
+  input.value = '';
+  // Switch to expenses section so they can see the imported transactions
+  const trigger = document.querySelector('[data-section-trigger="expenses"]');
+  if (trigger) trigger.click();
 }
 
 // ─── Initialize ─────────────────────────────────────────────

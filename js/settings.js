@@ -128,7 +128,7 @@ async function exportExpenseCSV() {
   ]);
 
   const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-  downloadFile(csv, `lensledger-expenses-${new Date().toISOString().slice(0, 7)}.csv`, 'text/csv');
+  downloadFile(csv, `haus-ledger-expenses-${new Date().toISOString().slice(0, 7)}.csv`, 'text/csv');
 }
 
 async function exportMileageCSV() {
@@ -158,7 +158,7 @@ async function exportMileageCSV() {
   ]);
 
   const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-  downloadFile(csv, `lensledger-mileage-${new Date().toISOString().slice(0, 7)}.csv`, 'text/csv');
+  downloadFile(csv, `haus-ledger-mileage-${new Date().toISOString().slice(0, 7)}.csv`, 'text/csv');
 }
 
 function downloadFile(content, filename, type) {
@@ -204,8 +204,15 @@ function initSettings() {
   // Wire export buttons
   const exportBtns = document.querySelectorAll('#settings .setting-row .button');
   if (exportBtns[0]) exportBtns[0].addEventListener('click', exportExpenseCSV);
-  if (exportBtns[1]) exportBtns[1].addEventListener('click', () => {
-    exportExpenseCSV();
-    exportMileageCSV();
-  });
+  if (exportBtns[1]) exportBtns[1].addEventListener('click', exportTaxPacket);
+
+  // Wire "Export for accountant" in tax center
+  const taxExportBtn = document.querySelector('#tax-center .header-actions .button.secondary');
+  if (taxExportBtn) taxExportBtn.addEventListener('click', exportTaxPacket);
+}
+
+async function exportTaxPacket() {
+  await exportExpenseCSV();
+  await exportMileageCSV();
+  alert('Tax packet exported: expenses CSV + mileage CSV downloaded.');
 }

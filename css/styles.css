@@ -2856,3 +2856,30 @@
         height: 196px;
       }
     }
+
+    /* Guide overlay feature cards */
+    .guide-features {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .guide-feature {
+      padding: 14px 16px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .guide-feature strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .guide-feature span {
+      font-size: 13px;
+      color: var(--dim);
+      line-height: 1.5;
+    }

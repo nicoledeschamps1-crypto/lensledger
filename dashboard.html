@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/styles.css?v=20260407c">
 </head>
 <body>
 
@@ -27,9 +27,9 @@
       </div>
 
       <div class="topbar-actions">
-        <div class="topbar-chip" aria-label="Current streak">
-          <span>🔥 7 day streak</span>
-          <small>Friday admin block locked</small>
+        <div class="topbar-chip" aria-label="Current streak" id="streakChip">
+          <span id="streakText">🔥 Loading...</span>
+          <small id="streakDetail">Checking review history</small>
         </div>
 
         <button class="timer-trigger" id="timerOpenButton" type="button" aria-haspopup="dialog" aria-controls="timerPanel" aria-expanded="false">
@@ -41,17 +41,24 @@
           <span class="timer-trigger-value mono" id="timerTopbarValue">25:00</span>
         </button>
 
-        <button class="icon-button" type="button" aria-label="Notifications">
-          <span aria-hidden="true">🔔</span>
-          <span class="count-badge">4</span>
+        <button class="icon-button" type="button" aria-label="Help guide" onclick="showGuide()" title="How to use Haus Ledger">
+          <span aria-hidden="true">?</span>
         </button>
 
-        <button class="user-button" type="button" aria-label="Nicole profile">
-          <span class="user-avatar">ND</span>
+        <button class="icon-button" type="button" aria-label="Notifications" id="notifButton">
+          <span aria-hidden="true">🔔</span>
+          <span class="count-badge" id="notifBadge" style="display:none;">0</span>
+        </button>
+
+        <button class="user-button" type="button" aria-label="User profile" id="userButton">
+          <span class="user-avatar" id="userAvatar">??</span>
           <span class="user-meta">
-            <strong>Nicole</strong>
+            <strong id="userName">User</strong>
             <span id="userRole"></span>
           </span>
+        </button>
+        <button class="icon-button" type="button" aria-label="Sign out" onclick="signOut()" title="Sign out">
+          <span aria-hidden="true">⏻</span>
         </button>
       </div>
     </header>
@@ -65,7 +72,7 @@
               <span class="icon" aria-hidden="true">◫</span>
               <span class="label">Dashboard</span>
             </button>
-            <button class="nav-item is-disabled" type="button" disabled aria-disabled="true">
+            <button class="nav-item" type="button" data-section-trigger="income">
               <span class="icon" aria-hidden="true">↗</span>
               <span class="label">Income</span>
             </button>
@@ -76,7 +83,7 @@
             <button class="nav-item" type="button" data-section-trigger="invoices">
               <span class="icon" aria-hidden="true">☰</span>
               <span class="label">Invoices</span>
-              <span class="nav-badge warn">2 overdue</span>
+              <span class="nav-badge warn" id="navInvoiceBadge" style="display:none;"></span>
             </button>
             <button class="nav-item" type="button" data-section-trigger="clients">
               <span class="icon" aria-hidden="true">◌</span>
@@ -85,7 +92,7 @@
             <button class="nav-item" type="button" data-section-trigger="tax-center">
               <span class="icon" aria-hidden="true">◎</span>
               <span class="label">Tax Center</span>
-              <span class="nav-badge accent">Q2</span>
+              <span class="nav-badge accent" id="navTaxBadge"></span>
             </button>
           </div>
         </div>
@@ -112,14 +119,24 @@
         <div class="section-stack">
           <div class="section-header">
             <div>
-              <span class="section-kicker">Today · Tuesday, April 7</span>
-              <h1 id="dashboardTitle">Good evening</h1>
+              <span class="section-kicker" id="dashKicker"></span>
+              <h1 id="dashboardTitle"></h1>
               <p>Your money admin is calm and current. Income is landing, expenses are mostly categorized, and there are a few receipts plus two overdue invoices worth clearing before Friday.</p>
             </div>
             <div class="header-actions">
               <button class="button primary" type="button" onclick="document.querySelector('[data-section-trigger=expenses]').click()">+ Log Expense</button>
             </div>
           </div>
+
+          <input type="file" accept=".csv" id="dashCsvImport" style="display:none;" onchange="handleCSVImport(this)">
+          <button type="button" onclick="document.getElementById('dashCsvImport').click()" style="width:100%;padding:24px 28px;background:linear-gradient(135deg,rgba(124,109,240,0.12),rgba(107,156,240,0.08));border:2px dashed rgba(124,109,240,0.4);border-radius:16px;cursor:pointer;display:flex;align-items:center;gap:20px;margin-bottom:20px;text-align:left;color:var(--text);">
+            <span style="font-size:42px;flex-shrink:0;">📎</span>
+            <div style="flex:1;">
+              <strong style="font-size:17px;display:block;margin-bottom:4px;">Import Bank Statement</strong>
+              <span style="font-size:14px;color:var(--dim);line-height:1.5;">Upload a CSV from your bank to pull in all your transactions at once. Then categorize them in the Expenses tab.</span>
+            </div>
+            <span style="padding:10px 22px;background:var(--accent);color:#fff;border-radius:12px;font-size:14px;font-weight:600;white-space:nowrap;">Choose File</span>
+          </button>
 
           <div class="stats-grid" aria-label="Primary performance metrics">
             <article class="card stat-card green">
@@ -285,26 +302,172 @@
         </div>
       </section>
 
+      <section id="income" class="section" aria-labelledby="incomeTitle">
+        <div class="section-stack">
+          <div class="section-header">
+            <div>
+              <span class="section-kicker" id="incomeKicker">Income overview</span>
+              <h1 id="incomeTitle">Income</h1>
+              <p>All the money coming in — from paid invoices, manual deposits, and side work. See who's paying, what's landing, and how the month is shaping up.</p>
+            </div>
+            <div class="header-actions">
+              <span class="pill green">Month total <strong class="mono" id="incomeHeaderTotal">$0</strong></span>
+            </div>
+          </div>
+
+          <div class="stats-grid" aria-label="Income metrics" style="grid-template-columns: repeat(3, 1fr);">
+            <article class="card stat-card green">
+              <div class="stat-card-header">
+                <span class="stat-label">This Month</span>
+                <span class="stat-trend green" id="incomeMonthTrend"></span>
+              </div>
+              <div class="stat-value mono green" id="incomeMonthValue">$0</div>
+              <p class="stat-footnote" id="incomeMonthNote">Total income received this month.</p>
+            </article>
+
+            <article class="card stat-card blue">
+              <div class="stat-card-header">
+                <span class="stat-label">Avg per Client</span>
+                <span class="stat-trend blue" id="incomeAvgTrend"></span>
+              </div>
+              <div class="stat-value mono blue" id="incomeAvgValue">$0</div>
+              <p class="stat-footnote">Average income per paying client this month.</p>
+            </article>
+
+            <article class="card stat-card yellow">
+              <div class="stat-card-header">
+                <span class="stat-label">Year to Date</span>
+                <span class="stat-trend yellow" id="incomeYtdTrend"></span>
+              </div>
+              <div class="stat-value mono yellow" id="incomeYtdValue">$0</div>
+              <p class="stat-footnote">Total income since January 1.</p>
+            </article>
+          </div>
+
+          <div class="expenses-main-grid">
+            <div class="stack">
+              <article class="card transactions-card">
+                <div class="transaction-header">
+                  <div class="card-title">
+                    <h2>Income History</h2>
+                    <p>Every payment received, sorted by most recent. Click the source pill to see the linked invoice.</p>
+                  </div>
+                  <div class="filter-row">
+                    <span class="pill green" id="incomeCountPill">0 payments</span>
+                  </div>
+                </div>
+                <div class="transaction-list" id="incomeList"></div>
+              </article>
+
+              <article class="card manual-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <h2>Log Income</h2>
+                    <p>For cash payments, Venmo, tips, print sales, or anything that didn't come through an invoice.</p>
+                  </div>
+                  <span class="pill neutral">Manual</span>
+                </div>
+
+                <form id="manualIncomeForm">
+                  <div class="manual-grid">
+                    <div class="field-group">
+                      <label for="incomeAmount">Amount</label>
+                      <input class="field mono" id="incomeAmount" name="amount" type="number" min="0" step="0.01" placeholder="0.00" required>
+                    </div>
+                    <div class="field-group">
+                      <label for="incomeDate">Date</label>
+                      <input class="field" id="incomeDate" name="date" type="date" required>
+                    </div>
+                    <div class="field-group">
+                      <label for="incomeClient">Client (optional)</label>
+                      <input class="field" id="incomeClient" type="text" placeholder="Type a client name" list="incomeClientDatalist" autocomplete="off">
+                      <datalist id="incomeClientDatalist"></datalist>
+                    </div>
+                    <div class="field-group">
+                      <label for="incomeSource">Source</label>
+                      <select class="field" id="incomeSource">
+                        <option value="cash">Cash</option>
+                        <option value="venmo">Venmo</option>
+                        <option value="zelle">Zelle</option>
+                        <option value="check">Check</option>
+                        <option value="transfer">Bank Transfer</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                    <div class="field-group full">
+                      <label for="incomeNote">Note</label>
+                      <input class="field" id="incomeNote" name="note" type="text" placeholder="Portrait session, print sale, second shooter gig, etc.">
+                    </div>
+                  </div>
+
+                  <div class="form-actions">
+                    <p class="muted-note">Manual income entries appear alongside invoice payments in your dashboard totals and tax calculations.</p>
+                    <button class="button primary" type="submit">Add Income</button>
+                  </div>
+                </form>
+              </article>
+            </div>
+
+            <div class="stack">
+              <article class="card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <h2>Income by Client</h2>
+                    <p>Who's generating the most revenue this year. Helps spot your best relationships.</p>
+                  </div>
+                  <span class="pill green">YTD</span>
+                </div>
+                <div id="incomeByClientList"></div>
+              </article>
+
+              <article class="card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <h2>Monthly Trend</h2>
+                    <p>Six-month income pattern to spot seasonality and growth.</p>
+                  </div>
+                  <span class="pill blue">Rolling</span>
+                </div>
+                <div id="incomeTrendBars"></div>
+              </article>
+
+              <article class="card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <h2>Recent Invoices Paid</h2>
+                    <p>The last invoices marked as paid, with client and amount.</p>
+                  </div>
+                  <button class="button small secondary" type="button" onclick="document.querySelector('[data-section-trigger=invoices]').click()">All invoices</button>
+                </div>
+                <div id="recentPaidInvoices"></div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="expenses" class="section" aria-labelledby="expensesTitle">
         <div class="section-stack">
           <div class="section-header">
             <div>
-              <span class="section-kicker">Expense review · April 2026</span>
+              <span class="section-kicker" id="expensesKicker"></span>
               <h1 id="expensesTitle">Expenses</h1>
               <p>Review incoming bank transactions, confirm category suggestions, attach receipts where needed, and keep your deductions clean while the month is still fresh.</p>
             </div>
             <div class="header-actions">
-              <label class="select-wrap" style="min-width: 168px;">
-                <span class="sr-only">Expense month</span>
-                <select aria-label="Select month">
-                  <option>April 2026</option>
-                  <option>March 2026</option>
-                  <option>February 2026</option>
-                </select>
-              </label>
               <span class="pill coral">Month total <strong class="mono" id="expensesHeaderTotal">$0</strong></span>
             </div>
           </div>
+
+          <input type="file" accept=".csv" id="csvImportInput" style="display:none;" onchange="handleCSVImport(this)">
+          <button type="button" onclick="document.getElementById('csvImportInput').click()" style="width:100%;padding:24px 28px;background:linear-gradient(135deg,rgba(124,109,240,0.12),rgba(107,156,240,0.08));border:2px dashed rgba(124,109,240,0.4);border-radius:16px;cursor:pointer;display:flex;align-items:center;gap:20px;margin-bottom:20px;text-align:left;color:var(--text);">
+            <span style="font-size:42px;flex-shrink:0;">📎</span>
+            <div style="flex:1;">
+              <strong style="font-size:17px;display:block;margin-bottom:4px;">Import Bank Statement</strong>
+              <span style="font-size:14px;color:var(--dim);line-height:1.5;">Upload your bank's CSV file to import all transactions. They'll appear below for you to categorize.</span>
+            </div>
+            <span style="padding:10px 22px;background:var(--accent);color:#fff;border-radius:12px;font-size:14px;font-weight:600;white-space:nowrap;">Choose File</span>
+          </button>
 
           <div class="expenses-top-grid">
             <article class="card raised bank-card">
@@ -413,6 +576,7 @@
                   </div>
                 </form>
               </article>
+
             </div>
 
             <div class="stack">
@@ -440,8 +604,14 @@
                   <strong>Scan or upload a receipt</strong>
                   <span>Drag a file here, pick one from your camera roll, or snap a photo before tossing the paper copy.</span>
                   <div class="inline-actions" style="justify-content: center; margin-top: 16px;">
-                    <button class="button primary small" type="button">Use Camera</button>
-                    <button class="button small secondary" type="button">Upload JPG / PDF</button>
+                    <label class="button primary small" style="cursor:pointer;">
+                      Use Camera
+                      <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleStandaloneReceipt(this)">
+                    </label>
+                    <label class="button small secondary" style="cursor:pointer;">
+                      Upload JPG / PDF
+                      <input type="file" accept="image/*,.pdf" style="display:none;" onchange="handleStandaloneReceipt(this)">
+                    </label>
                   </div>
                 </div>
               </article>
@@ -503,9 +673,9 @@
               <div class="card-header">
                 <div class="card-title">
                   <h2>Quick Create</h2>
-                  <p>Pick a template and start from your package defaults instead of rebuilding the same invoice every time.</p>
+                  <p>Pick a package to start from your defaults, or create a new one. Edit packages anytime — changes won't affect past invoices.</p>
                 </div>
-                <span class="pill neutral">Templates</span>
+                <span class="pill neutral">Packages</span>
               </div>
 
               <div class="template-grid" id="templateGrid"></div>
@@ -841,6 +1011,10 @@
       <span class="mobile-nav-icon" aria-hidden="true">◫</span>
       <span>Home</span>
     </button>
+    <button type="button" data-section-trigger="income">
+      <span class="mobile-nav-icon" aria-hidden="true">↗</span>
+      <span>Income</span>
+    </button>
     <button type="button" data-section-trigger="expenses">
       <span class="mobile-nav-icon" aria-hidden="true">⌁</span>
       <span>Expenses</span>
@@ -895,11 +1069,26 @@
 <!-- Supabase SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
-<script src="js/supabase-config.js"></script>
+<script src="js/supabase-config.js?v=20260407c"></script>
 
 <!-- Auth: wait for session, then update UI or redirect -->
 <script>
   // Auth state tracking
+  function populateUserUI(user) {
+    const name = user.user_metadata?.full_name || user.email || '';
+    const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '??';
+    const el = id => document.getElementById(id);
+    if (el('userAvatar')) el('userAvatar').textContent = initials;
+    if (el('userName')) el('userName').textContent = name.split(' ')[0] || 'User';
+    const userBtn = el('userButton');
+    if (userBtn) {
+      userBtn.title = 'Go to Settings';
+      userBtn.onclick = () => {
+        const trigger = document.querySelector('[data-section-trigger="settings"]');
+        if (trigger) trigger.click();
+      };
+    }
+  }
 
   // Don't redirect immediately — give Supabase time to process OAuth tokens
   let authResolved = false;
@@ -916,33 +1105,11 @@
       }
       authResolved = true;
       const _overlay = document.getElementById('authLoadingOverlay'); if (_overlay) _overlay.remove();
-      const user = session.user;
-      const name = user.user_metadata?.full_name || user.email || '';
-      const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '??';
-
-      const avatarEl = document.querySelector('.user-avatar');
-      if (avatarEl) avatarEl.textContent = initials;
-
-      const nameEl = document.querySelector('.user-meta strong');
-      if (nameEl) nameEl.textContent = name.split(' ')[0] || 'User';
-
-      const userBtn = document.querySelector('.user-button');
-      if (userBtn) {
-        userBtn.title = 'Go to Settings';
-        userBtn.onclick = () => {
-          // Navigate to settings section
-          const trigger = document.querySelector('[data-section-trigger="settings"]');
-          if (trigger) trigger.click();
-        };
-      }
-      // Clean up the URL hash
-      if (window.location.hash) {
-        history.replaceState(null, '', window.location.pathname);
-      }
+      populateUserUI(session.user);
+      if (window.location.hash) history.replaceState(null, '', window.location.pathname);
     }
 
     if (event === 'INITIAL_SESSION' && session) {
-      // Block unauthorized users
       if (!isAllowedUser(session.user.email)) {
         await sb.auth.signOut();
         document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:Inter,sans-serif;color:#e8e8ed;background:#131318;text-align:center;padding:24px;"><div><h1 style="font-size:24px;margin-bottom:12px;">Access Restricted</h1><p style="color:#9898a8;">This app is private. Contact the owner for access.</p><br><a href="/index.html" style="color:#7c6df0;">Back to sign in</a></div></div>';
@@ -950,25 +1117,7 @@
       }
       authResolved = true;
       const _overlay = document.getElementById('authLoadingOverlay'); if (_overlay) _overlay.remove();
-      // Already logged in from a previous visit
-      const user = session.user;
-      const name = user.user_metadata?.full_name || user.email || '';
-      const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '??';
-
-      const avatarEl = document.querySelector('.user-avatar');
-      if (avatarEl) avatarEl.textContent = initials;
-
-      const nameEl = document.querySelector('.user-meta strong');
-      if (nameEl) nameEl.textContent = name.split(' ')[0] || 'User';
-
-      const userBtn = document.querySelector('.user-button');
-      if (userBtn) {
-        userBtn.title = 'Go to Settings';
-        userBtn.onclick = () => {
-          const trigger = document.querySelector('[data-section-trigger="settings"]');
-          if (trigger) trigger.click();
-        };
-      }
+      populateUserUI(session.user);
     }
 
     if (event === 'INITIAL_SESSION' && !session && !window.location.hash) {
@@ -996,21 +1145,24 @@
 </script>
 
 <!-- App logic (section switching, timer, review checklist, etc.) -->
-<script src="js/app-mockup.js"></script>
+<script src="js/app-mockup.js?v=20260407c"></script>
 
 <!-- App modules -->
-<script src="js/expenses.js"></script>
-<script src="js/clients.js"></script>
-<script src="js/invoices.js"></script>
-<script src="js/tax.js"></script>
-<script src="js/dashboard-stats.js"></script>
-<script src="js/settings.js"></script>
-<script src="js/onboarding.js"></script>
+<script src="js/expenses.js?v=20260407c"></script>
+<script src="js/clients.js?v=20260407c"></script>
+<script src="js/invoices.js?v=20260407c"></script>
+<script src="js/tax.js?v=20260407c"></script>
+<script src="js/guide.js?v=20260407c"></script>
+<script src="js/income.js?v=20260407c"></script>
+<script src="js/dashboard-stats.js?v=20260407c"></script>
+<script src="js/settings.js?v=20260407c"></script>
+<script src="js/onboarding.js?v=20260407c"></script>
 <script>
   // Initialize all modules when auth is ready
   sb.auth.onAuthStateChange((event, session) => {
     if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
       initExpenses();
+      initIncome();
       initClients();
       initInvoices();
       initTax();

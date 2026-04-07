@@ -214,7 +214,8 @@ async function saveMileage() {
     start_location: document.getElementById('mileageFrom').value.trim(),
     end_location: document.getElementById('mileageTo').value.trim(),
     purpose: document.getElementById('mileagePurpose').value.trim(),
-    irs_rate: IRS_RATE
+    irs_rate: IRS_RATE,
+    deductible_amount: +(miles * IRS_RATE).toFixed(2)
   });
 
   if (error) {

@@ -7,13 +7,30 @@ let _invoiceFilter = 'all';
 let _invoicesInitialized = false;
 let _nextInvoiceNum = 1;
 
-const INVOICE_TEMPLATES = {
-  Wedding:     [{ description: 'Wedding collection balance', price: 2200 }, { description: 'Album design retainer', price: 200 }],
-  Portrait:    [{ description: 'Portrait session fee', price: 350 }, { description: 'Digital delivery package', price: 100 }],
-  Commercial:  [{ description: 'Commercial shoot — half day', price: 800 }, { description: 'Usage license (1 year)', price: 400 }],
-  Event:       [{ description: 'Event coverage (4 hours)', price: 600 }, { description: 'Same-day preview edit', price: 150 }],
-  Custom:      [{ description: 'Custom service', price: 0 }]
+const DEFAULT_TEMPLATES = {
+  'Wedding':    [{ description: 'Wedding collection balance', price: 2200 }, { description: 'Album design retainer', price: 200 }],
+  'Portrait':   [{ description: 'Portrait session fee', price: 350 }, { description: 'Digital delivery package', price: 100 }],
+  'Corporate':  [{ description: 'Headshots (per person)', price: 150 }, { description: 'Usage license (1 year)', price: 400 }],
+  'Event':      [{ description: 'Event coverage (4 hours)', price: 600 }, { description: 'Same-day preview edit', price: 150 }],
+  'Birthday':   [{ description: 'Party coverage (3 hours)', price: 450 }, { description: 'Digital gallery', price: 100 }],
+  'Graduation': [{ description: 'Cap & gown session', price: 275 }, { description: 'Digital delivery', price: 75 }],
+  'Custom':     [{ description: 'Custom service', price: 0 }]
 };
+
+function getTemplates() {
+  const saved = localStorage.getItem('haus-invoice-templates');
+  if (saved) {
+    try { return JSON.parse(saved); } catch (e) { /* fall through */ }
+  }
+  return { ...DEFAULT_TEMPLATES };
+}
+
+function saveTemplates(templates) {
+  localStorage.setItem('haus-invoice-templates', JSON.stringify(templates));
+}
+
+// Alias used throughout the module
+let INVOICE_TEMPLATES = getTemplates();
 
 async function loadInvoices() {
   const user = await getUser();
@@ -45,6 +62,17 @@ function renderInvoiceStats() {
   const outstanding = _invoices.filter(i => ['sent', 'viewed', 'overdue'].includes(i.status))
     .reduce((s, i) => s + Number(i.total), 0);
   const overdue = _invoices.filter(i => i.status === 'overdue').length;
+
+  // Update nav badge dynamically
+  const navBadge = document.getElementById('navInvoiceBadge');
+  if (navBadge) {
+    if (overdue > 0) {
+      navBadge.textContent = `${overdue} overdue`;
+      navBadge.style.display = '';
+    } else {
+      navBadge.style.display = 'none';
+    }
+  }
   const paidThisMonth = _invoices.filter(i => i.status === 'paid' && i.paid_date && i.paid_date.startsWith(new Date().toISOString().slice(0, 7)))
     .reduce((s, i) => s + Number(i.total), 0);
   const paidInvoices = _invoices.filter(i => i.status === 'paid' && i.paid_date && i.issue_date);
@@ -136,11 +164,15 @@ function renderTemplateGrid() {
   const el = document.getElementById('templateGrid');
   if (!el) return;
 
+  INVOICE_TEMPLATES = getTemplates();
+
   el.innerHTML = Object.keys(INVOICE_TEMPLATES).map(name => `
-    <button class="tag-button ${_selectedTemplate === name ? 'is-active' : ''}" type="button" onclick="selectTemplate('${name}')">
-      ${name}
+    <button class="tag-button ${_selectedTemplate === name ? 'is-active' : ''}" type="button" onclick="selectTemplate('${escapeHtml(name)}')">
+      ${escapeHtml(name)}
     </button>
-  `).join('');
+  `).join('') + `
+    <button class="tag-button" type="button" onclick="showTemplateEditor()" style="border-style:dashed;opacity:0.7;">+ New Package</button>
+  `;
 
   populateClientDatalist();
   renderTemplatePreview();
@@ -156,25 +188,30 @@ function renderTemplatePreview() {
   if (!el) return;
 
   if (!_selectedTemplate) {
-    el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--dim);font-size:13px;">Select a template above to see line items</div>';
+    el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--dim);font-size:13px;">Select a package above to see line items</div>';
     return;
   }
 
   const items = INVOICE_TEMPLATES[_selectedTemplate];
+  if (!items) { _selectedTemplate = null; renderTemplatePreview(); return; }
   const total = items.reduce((s, i) => s + i.price, 0);
 
   el.innerHTML = `
     <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-top:12px;">
       ${items.map(item => `
         <div style="display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;">
-          <span>${item.description}</span>
+          <span>${escapeHtml(item.description)}</span>
           <span class="mono">$${item.price.toFixed(2)}</span>
         </div>
       `).join('')}
       <div style="display:flex;justify-content:space-between;padding:12px 14px;font-weight:600;">
-        <span>Template total</span>
+        <span>Package total</span>
         <span class="mono">$${total.toFixed(2)}</span>
       </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button class="button small secondary" type="button" onclick="showTemplateEditor('${escapeHtml(_selectedTemplate)}')">Edit Package</button>
+      <button class="button small ghost" type="button" onclick="deleteTemplate('${escapeHtml(_selectedTemplate)}')" style="color:var(--red);">Delete</button>
     </div>
   `;
 }
@@ -462,6 +499,103 @@ async function deleteInvoice(id) {
 
   document.getElementById('invoiceModal').remove();
   await loadInvoices();
+}
+
+// ─── Template Editor ────────────────────────────────────────
+
+function showTemplateEditor(existingName) {
+  const existing = document.getElementById('templateEditorModal');
+  if (existing) existing.remove();
+
+  const isEdit = !!existingName;
+  const items = isEdit ? [...INVOICE_TEMPLATES[existingName].map(i => ({...i}))] : [{ description: '', price: 0 }];
+
+  const modal = document.createElement('div');
+  modal.id = 'templateEditorModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;padding:24px;';
+  modal.innerHTML = `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:32px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;cursor:default;" onclick="event.stopPropagation();">
+      <h2 style="font-size:18px;margin-bottom:20px;">${isEdit ? 'Edit Package' : 'New Package'}</h2>
+      <div class="field-group" style="margin-bottom:16px;">
+        <label for="templateName">Package Name</label>
+        <input class="field" id="templateName" type="text" value="${escapeHtml(existingName || '')}" placeholder="e.g. Quincea\u00f1era, Baby Shower, Engagement..." ${isEdit ? '' : 'autofocus'}>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:13px;font-weight:600;color:var(--dim);display:block;margin-bottom:8px;">Line Items</label>
+        <div id="templateLineItems">
+          ${items.map((item, i) => templateLineItemRow(i, item)).join('')}
+        </div>
+        <button class="button small secondary" type="button" onclick="addTemplateLine()" style="margin-top:8px;">+ Add Line Item</button>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+        <button class="button secondary" type="button" onclick="document.getElementById('templateEditorModal').remove()">Cancel</button>
+        <button class="button primary" type="button" onclick="saveTemplate('${escapeHtml(existingName || '')}')">Save Package</button>
+      </div>
+    </div>
+  `;
+  modal.addEventListener('click', () => modal.remove());
+  document.body.appendChild(modal);
+}
+
+function templateLineItemRow(index, item) {
+  return `
+    <div class="template-line-row" style="display:flex;gap:8px;align-items:center;margin-bottom:8px;" data-line="${index}">
+      <input class="field" type="text" placeholder="Description" value="${escapeHtml(item.description)}" style="flex:1;" data-field="description">
+      <input class="field mono" type="number" min="0" step="0.01" placeholder="0.00" value="${item.price || ''}" style="width:100px;" data-field="price">
+      <button class="button small ghost" type="button" onclick="this.parentElement.remove()" style="opacity:0.5;flex-shrink:0;">x</button>
+    </div>`;
+}
+
+function addTemplateLine() {
+  const container = document.getElementById('templateLineItems');
+  if (!container) return;
+  const index = container.children.length;
+  const div = document.createElement('div');
+  div.innerHTML = templateLineItemRow(index, { description: '', price: 0 });
+  container.appendChild(div.firstElementChild);
+}
+
+function saveTemplate(originalName) {
+  const nameInput = document.getElementById('templateName');
+  const name = nameInput.value.trim();
+  if (!name) { alert('Please enter a package name.'); return; }
+
+  const rows = document.querySelectorAll('#templateLineItems .template-line-row');
+  const items = [];
+  rows.forEach(row => {
+    const desc = row.querySelector('[data-field="description"]').value.trim();
+    const price = parseFloat(row.querySelector('[data-field="price"]').value) || 0;
+    if (desc) items.push({ description: desc, price });
+  });
+
+  if (items.length === 0) { alert('Add at least one line item.'); return; }
+
+  const templates = getTemplates();
+
+  // If renaming, delete old key
+  if (originalName && originalName !== name) {
+    delete templates[originalName];
+  }
+
+  templates[name] = items;
+  saveTemplates(templates);
+  INVOICE_TEMPLATES = templates;
+
+  document.getElementById('templateEditorModal').remove();
+  _selectedTemplate = name;
+  renderTemplateGrid();
+}
+
+function deleteTemplate(name) {
+  if (!confirm(`Delete the "${name}" package template? This won't affect existing invoices.`)) return;
+
+  const templates = getTemplates();
+  delete templates[name];
+  saveTemplates(templates);
+  INVOICE_TEMPLATES = templates;
+
+  _selectedTemplate = null;
+  renderTemplateGrid();
 }
 
 // ─── Init ───────────────────────────────────────────────────

@@ -32,6 +32,23 @@ async function loadDashboardStats() {
   renderRecentClientsMini();
   renderTaxSnapshotMini(monthTx);
   renderRecurringList(user.id);
+  updateNotificationBadge();
+}
+
+function updateNotificationBadge() {
+  const overdue = (_invoices || []).filter(i => i.status === 'overdue').length;
+  const missingReceipts = _allTransactions.filter(t => t.type === 'expense' && (!t.receipts || t.receipts.length === 0)).length;
+  const total = overdue + (missingReceipts > 0 ? 1 : 0); // count missing receipts as 1 notification
+
+  const badge = document.getElementById('notifBadge');
+  if (badge) {
+    if (total > 0) {
+      badge.textContent = total;
+      badge.style.display = '';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
 }
 
 // ─── Hero Stats ─────────────────────────────────────────────
@@ -115,6 +132,34 @@ function renderReviewChecklist(userId) {
     const left = tasks.length - checkedCount;
     metaCopy.textContent = left === 0 ? 'All done this week!' : `${left} task${left !== 1 ? 's' : ''} left for this week.`;
   }
+
+  // Update streak in topbar
+  updateStreakDisplay(userId);
+}
+
+function updateStreakDisplay(userId) {
+  let streak = 0;
+  const now = new Date();
+  // Count consecutive past weeks where all 5 tasks were checked
+  for (let w = 0; w < 52; w++) {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (w * 7));
+    const start = new Date(d.getFullYear(), 0, 1);
+    const wk = Math.ceil(((d - start) / 86400000 + start.getDay() + 1) / 7);
+    const key = `haus-review-${userId}-${d.getFullYear()}-W${wk}`;
+    const saved = JSON.parse(localStorage.getItem(key) || '{}');
+    const done = Object.values(saved).filter(Boolean).length;
+    if (w === 0) {
+      // Current week: count if any progress
+      if (done > 0) streak++;
+      continue;
+    }
+    if (done >= 5) { streak++; } else { break; }
+  }
+
+  const streakText = document.getElementById('streakText');
+  const streakDetail = document.getElementById('streakDetail');
+  if (streakText) streakText.textContent = streak > 0 ? `🔥 ${streak} week streak` : '📋 Start your streak';
+  if (streakDetail) streakDetail.textContent = streak > 0 ? 'Weekly reviews completed' : 'Complete this week\'s review';
 }
 
 function toggleReviewItem(storageKey, itemId, checked) {
@@ -172,6 +217,29 @@ function renderDonutChart(monthTx) {
   const sorted = Object.values(byCategory).sort((a, b) => b.total - a.total).slice(0, 5);
   const grandTotal = sorted.reduce((s, c) => s + c.total, 0);
 
+  // Update SVG ring segments dynamically
+  const svgEl = document.querySelector('.donut-chart svg');
+  if (svgEl) {
+    const r = 72;
+    const circumference = 2 * Math.PI * r;
+    let circles = `<circle cx="98" cy="98" r="${r}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="18"></circle>`;
+    let offset = 0;
+    for (const c of sorted) {
+      const arcLen = grandTotal > 0 ? (c.total / grandTotal) * circumference : 0;
+      if (arcLen > 0) {
+        circles += `<circle cx="98" cy="98" r="${r}" fill="none" stroke="${c.color}" stroke-width="18" stroke-linecap="round" stroke-dasharray="${arcLen} ${circumference}" stroke-dashoffset="${-offset}"></circle>`;
+        offset += arcLen + 4; // small gap between segments
+      }
+    }
+    svgEl.innerHTML = circles;
+  }
+
+  // Update donut center total
+  const donutCenter = document.querySelector('.donut-center');
+  if (donutCenter) {
+    donutCenter.innerHTML = `<strong class="mono">$${fmtMoney(grandTotal)}</strong><span>${new Date().toLocaleDateString('en-US', { month: 'long' })} expenses</span>`;
+  }
+
   legendEl.innerHTML = sorted.length > 0
     ? sorted.map(c => {
         const pct = grandTotal > 0 ? Math.round((c.total / grandTotal) * 100) : 0;
@@ -184,10 +252,6 @@ function renderDonutChart(monthTx) {
           </div>`;
       }).join('')
     : '<div style="font-size:13px;color:var(--dim);">No expenses this month yet.</div>';
-
-  // Update donut center total
-  const donutTotal = document.querySelector('#dashboard .donut-center-value, .donut-value');
-  if (donutTotal) donutTotal.textContent = '$' + fmtMoney(grandTotal);
 }
 
 // ─── Recent Activity ────────────────────────────────────────
@@ -369,5 +433,23 @@ function fmtMoney(n) {
 function initDashboardStats() {
   if (_dashStatsInitialized) return;
   _dashStatsInitialized = true;
+
+  // Set dynamic date strings
+  const now = new Date();
+  const dayName = now.toLocaleDateString('en-US', { weekday: 'long' });
+  const monthDay = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+  const monthYear = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const hour = now.getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
+  const el = id => document.getElementById(id);
+  if (el('dashKicker')) el('dashKicker').textContent = `Today · ${dayName}, ${monthDay}`;
+  if (el('dashboardTitle')) el('dashboardTitle').textContent = greeting;
+  if (el('expensesKicker')) el('expensesKicker').textContent = `Expense review · ${monthYear}`;
+
+  // Dynamic tax quarter badge
+  const currentQ = Math.floor(now.getMonth() / 3) + 1;
+  if (el('navTaxBadge')) el('navTaxBadge').textContent = `Q${currentQ}`;
+
   loadDashboardStats();
 }
