@@ -1,0 +1,11 @@
+# LensLedger — Netlify Configuration
+
+[build]
+  publish = "."
+  # No build command needed — static files only
+
+# Redirect root to index.html
+[[redirects]]
+  from = "/"
+  to = "/index.html"
+  status = 200

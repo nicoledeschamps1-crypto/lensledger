@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LensLedger | Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div id="liveRegion" class="sr-only" aria-live="polite"></div>
+
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand" aria-label="LensLedger">
+        <div class="brand-mark" aria-hidden="true">📸</div>
+        <div class="brand-copy">
+          <div class="brand-title">LensLedger</div>
+          <div class="brand-subtitle">Freelance photographer bookkeeping dashboard</div>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <div class="topbar-chip" aria-label="Current streak">
+          <span>🔥 7 day streak</span>
+          <small>Friday admin block locked</small>
+        </div>
+
+        <button class="timer-trigger" id="timerOpenButton" type="button" aria-haspopup="dialog" aria-controls="timerPanel" aria-expanded="false">
+          <span class="timer-trigger-icon" aria-hidden="true">⏱</span>
+          <span class="timer-trigger-copy">
+            <strong>Sprint Timer</strong>
+            <span id="timerTopbarState">Ready for a 25 min sprint</span>
+          </span>
+          <span class="timer-trigger-value mono" id="timerTopbarValue">25:00</span>
+        </button>
+
+        <button class="icon-button" type="button" aria-label="Notifications">
+          <span aria-hidden="true">🔔</span>
+          <span class="count-badge">4</span>
+        </button>
+
+        <button class="user-button" type="button" aria-label="Nicole profile">
+          <span class="user-avatar">ND</span>
+          <span class="user-meta">
+            <strong>Nicole</strong>
+            <span>Owner</span>
+          </span>
+        </button>
+      </div>
+    </header>
+
+    <aside class="sidebar">
+      <nav aria-label="Primary">
+        <div class="nav-group">
+          <div class="nav-label">Workspace</div>
+          <div class="nav-list">
+            <button class="nav-item is-active" type="button" data-section-trigger="dashboard" aria-current="page">
+              <span class="icon" aria-hidden="true">◫</span>
+              <span class="label">Dashboard</span>
+            </button>
+            <button class="nav-item is-disabled" type="button" disabled aria-disabled="true">
+              <span class="icon" aria-hidden="true">↗</span>
+              <span class="label">Income</span>
+            </button>
+            <button class="nav-item" type="button" data-section-trigger="expenses">
+              <span class="icon" aria-hidden="true">⌁</span>
+              <span class="label">Expenses</span>
+            </button>
+            <button class="nav-item" type="button" data-section-trigger="invoices">
+              <span class="icon" aria-hidden="true">☰</span>
+              <span class="label">Invoices</span>
+              <span class="nav-badge warn">2 overdue</span>
+            </button>
+            <button class="nav-item" type="button" data-section-trigger="clients">
+              <span class="icon" aria-hidden="true">◌</span>
+              <span class="label">Clients</span>
+            </button>
+            <button class="nav-item" type="button" data-section-trigger="tax-center">
+              <span class="icon" aria-hidden="true">◎</span>
+              <span class="label">Tax Center</span>
+              <span class="nav-badge accent">Q2</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-label">Tools</div>
+          <div class="nav-list">
+            <button class="nav-item is-disabled" type="button" disabled aria-disabled="true">
+              <span class="icon" aria-hidden="true">▣</span>
+              <span class="label">Receipts</span>
+            </button>
+            <button class="nav-item is-disabled" type="button" disabled aria-disabled="true">
+              <span class="icon" aria-hidden="true">◔</span>
+              <span class="label">Subscriptions</span>
+            </button>
+            <button class="nav-item" type="button" data-section-trigger="settings">
+              <span class="icon" aria-hidden="true">⚙</span>
+              <span class="label">Settings</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <h3>Weekly admin runway</h3>
+        <p>Set aside one clean 45 minute block for receipts, two invoice follow-ups, and your Q2 tax transfer before the weekend rush hits.</p>
+        <button class="button small secondary" type="button" onclick="showSection('tax-center')">Review tax plan</button>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <section id="dashboard" class="section is-active" aria-labelledby="dashboardTitle">
+        <div class="section-stack">
+          <div class="section-header">
+            <div>
+              <span class="section-kicker">Today · Tuesday, April 7</span>
+              <h1 id="dashboardTitle">Good evening</h1>
+              <p>Your money admin is calm and current. Income is landing, expenses are mostly categorized, and there are a few receipts plus two overdue invoices worth clearing before Friday.</p>
+            </div>
+            <div class="header-actions">
+              <button class="button primary" type="button">📷 Snap Receipt</button>
+              <button class="button secondary" type="button">＋ Log Expense</button>
+            </div>
+          </div>
+
+          <div class="stats-grid" aria-label="Primary performance metrics">
+            <article class="card stat-card green">
+              <div class="stat-card-header">
+                <span class="stat-label">Income</span>
+                <span class="stat-trend green">+18% vs Mar</span>
+              </div>
+              <div class="stat-value mono green">$4,850</div>
+              <p class="stat-footnote">Four client payments landed this month, with the strongest lift coming from wedding retainers and brand mini shoots.</p>
+            </article>
+
+            <article class="card stat-card yellow">
+              <div class="stat-card-header">
+                <span class="stat-label">Pending</span>
+                <span class="stat-trend yellow">3 invoices open</span>
+              </div>
+              <div class="stat-value mono yellow">$1,200</div>
+              <p class="stat-footnote">Two overdue reminders are ready to send and one viewed invoice is likely to convert after a gentle follow-up.</p>
+            </article>
+
+            <article class="card stat-card coral">
+              <div class="stat-card-header">
+                <span class="stat-label">Expenses</span>
+                <span class="stat-trend coral">12 new items</span>
+              </div>
+              <div class="stat-value mono coral">$1,340</div>
+              <p class="stat-footnote">Travel and gear were the largest categories this month, with recurring software spend staying stable and predictable.</p>
+            </article>
+
+            <article class="card stat-card blue">
+              <div class="stat-card-header">
+                <span class="stat-label">Profit</span>
+                <span class="stat-trend blue">72.4% margin</span>
+              </div>
+              <div class="stat-value mono blue">$3,510</div>
+              <p class="stat-footnote">Profit stayed healthy because home office and marketing spend were lighter than forecast heading into spring bookings.</p>
+            </article>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="stack">
+              <article class="card review-card">
+                <div class="review-top">
+                  <div class="card-title">
+                    <h2>Weekly Review</h2>
+                    <p>Keep the back office tidy in five small steps. Each check keeps the dashboard honest and the tax picture cleaner.</p>
+                  </div>
+                  <div class="review-metrics">
+                    <span class="pill green" id="reviewCountPill">3 / 5 complete</span>
+                    <span class="pill neutral" id="reviewStreakPill">4 week streak</span>
+                  </div>
+                </div>
+
+                <div class="review-progress" role="progressbar" aria-valuemin="0" aria-valuemax="5" aria-valuenow="3" aria-label="Weekly review progress">
+                  <div class="review-progress-bar" id="reviewProgressBar"></div>
+                </div>
+
+                <div class="review-meta">
+                  <span id="reviewMetaCopy">Two admin tasks left for this week.</span>
+                  <span>Finish before Friday 5:00 PM</span>
+                </div>
+
+                <div class="review-list" id="reviewChecklist"></div>
+              </article>
+
+              <div class="two-column">
+                <article class="card quick-log-card">
+                  <div class="card-header">
+                    <div class="card-title">
+                      <h2>Quick Log</h2>
+                      <p>Fast capture buttons for the expenses you repeat constantly between shoots, deliveries, and edit days.</p>
+                    </div>
+                    <span class="pill neutral">3 × 2</span>
+                  </div>
+                  <div class="quick-log-grid" id="quickLogGrid"></div>
+                </article>
+
+                <article class="card donut-card">
+                  <div class="card-header">
+                    <div class="card-title">
+                      <h2>Expense Mix</h2>
+                      <p>Where this month’s business spend is clustering so far.</p>
+                    </div>
+                    <span class="pill coral">April</span>
+                  </div>
+                  <div class="donut-layout">
+                    <div class="donut-chart">
+                      <svg viewBox="0 0 196 196" aria-hidden="true">
+                        <circle cx="98" cy="98" r="72" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="18"></circle>
+                        <circle cx="98" cy="98" r="72" fill="none" stroke="var(--coral)" stroke-width="18" stroke-linecap="round" stroke-dasharray="140 452"></circle>
+                        <circle cx="98" cy="98" r="72" fill="none" stroke="var(--blue)" stroke-width="18" stroke-linecap="round" stroke-dasharray="92 452" stroke-dashoffset="-148"></circle>
+                        <circle cx="98" cy="98" r="72" fill="none" stroke="var(--yellow)" stroke-width="18" stroke-linecap="round" stroke-dasharray="68 452" stroke-dashoffset="-246"></circle>
+                        <circle cx="98" cy="98" r="72" fill="none" stroke="var(--green)" stroke-width="18" stroke-linecap="round" stroke-dasharray="52 452" stroke-dashoffset="-320"></circle>
+                      </svg>
+                      <div class="donut-center">
+                        <strong class="mono">$1,340</strong>
+                        <span>April expenses</span>
+                      </div>
+                    </div>
+                    <div class="legend-list" id="donutLegend"></div>
+                  </div>
+                </article>
+              </div>
+
+              <article class="card activity-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <h2>Recent Activity</h2>
+                    <p>The last few bookkeeping actions across invoices, tax transfers, and bank transaction cleanup.</p>
+                  </div>
+                  <span class="pill neutral">5 events</span>
+                </div>
+                <div class="activity-list" id="activityList"></div>
+              </article>
+
+              <article class="card trend-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <h2>6-Month Trend</h2>
+                    <p>Income and expenses side by side for a quick sense of seasonality heading into wedding season.</p>
+                  </div>
+                  <span class="pill blue">Rolling view</span>
+                </div>
+                <div class="trend-bars" id="trendBars"></div>
+              </article>
+            </div>
+
+            <div class="stack">
+              <article class="card clients-mini-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <h2>Recent Clients</h2>
+                    <p>The clients with the most recent work or money movement.</p>
+                  </div>
+                  <button class="button small secondary" type="button" onclick="showSection('clients')">Open client list</button>
+                </div>
+                <div class="client-mini-grid" id="recentClientsMini"></div>
+              </article>
+
+              <article class="card snapshot-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <h2>Tax Snapshot</h2>
+                    <p>Quarterly coverage and deductible tracking in one glance.</p>
+                  </div>
+                  <button class="button small secondary" type="button" onclick="showSection('tax-center')">Tax center</button>
+                </div>
+                <div class="snapshot-grid" id="taxSnapshotGrid"></div>
+              </article>
+
+              <article class="card recurring-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <h2>Recurring Expenses</h2>
+                    <p>Subscriptions and monthly costs that quietly shape your baseline spend.</p>
+                  </div>
+                  <span class="pill neutral">Monthly</span>
+                </div>
+                <div class="recurring-list" id="recurringList"></div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="expenses" class="section" aria-labelledby="expensesTitle">
+        <div class="section-stack">
+          <div class="section-header">
+            <div>
+              <span class="section-kicker">Expense review · April 2026</span>
+              <h1 id="expensesTitle">Expenses</h1>
+              <p>Review incoming bank transactions, confirm category suggestions, attach receipts where needed, and keep your deductions clean while the month is still fresh.</p>
+            </div>
+            <div class="header-actions">
+              <label class="select-wrap" style="min-width: 168px;">
+                <span class="sr-only">Expense month</span>
+                <select aria-label="Select month">
+                  <option>April 2026</option>
+                  <option>March 2026</option>
+                  <option>February 2026</option>
+                </select>
+              </label>
+              <span class="pill coral">Month total <strong class="mono" id="expensesHeaderTotal">$0</strong></span>
+            </div>
+          </div>
+
+          <div class="expenses-top-grid">
+            <article class="card bank-card">
+              <div class="bank-hero">
+                <div class="bank-illustration" aria-hidden="true">
+                  <div>
+                    🏦<br>🔗<br>💳
+                    <small>Plaid-style bank sync</small>
+                  </div>
+                </div>
+                <div class="bank-copy">
+                  <h2>Connect Your Bank</h2>
+                  <p>Mercury Business Checking is already linked and syncing card activity into your review queue. If you want a backup import, upload a CSV from a different card or personal account and split mixed purchases right here.</p>
+                  <div class="inline-actions">
+                    <button class="button primary" type="button">Link Account</button>
+                    <button class="button secondary" type="button">Upload CSV</button>
+                    <button class="button ghost" type="button">Sync now</button>
+                  </div>
+                  <div class="bank-status-grid">
+                    <div class="bank-status-item">
+                      <span>Connected</span>
+                      <strong>Mercury</strong>
+                    </div>
+                    <div class="bank-status-item">
+                      <span>Last synced</span>
+                      <strong>8 min ago</strong>
+                    </div>
+                    <div class="bank-status-item">
+                      <span>New since review</span>
+                      <strong>23 transactions</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="card raised bank-card">
+              <div class="card-header">
+                <div class="card-title">
+                  <h2>Review Summary</h2>
+                  <p>Keep the review queue moving so nothing piles up before taxes.</p>
+                </div>
+                <span class="pill yellow" id="reviewQueuePill">6 awaiting review</span>
+              </div>
+              <div class="expense-summary-grid">
+                <div class="expense-summary-item">
+                  <div class="activity-main">
+                    <div class="activity-icon">🧾</div>
+                    <div class="activity-copy">
+                      <strong id="missingReceiptHeadline">3 transactions missing receipts</strong>
+                      <span>Most are ready to attach from your phone.</span>
+                    </div>
+                  </div>
+                  <span class="pill yellow" id="receiptMissingPill">3 open</span>
+                </div>
+                <div class="expense-summary-item">
+                  <div class="activity-main">
+                    <div class="activity-icon">✅</div>
+                    <div class="activity-copy">
+                      <strong id="categorizedHeadline">4 categorized this month</strong>
+                      <span>These are already ready for export to your accountant.</span>
+                    </div>
+                  </div>
+                  <span class="pill green" id="categorizedPill">4 ready</span>
+                </div>
+                <div class="expense-summary-item">
+                  <div class="activity-main">
+                    <div class="activity-icon">📂</div>
+                    <div class="activity-copy">
+                      <strong id="topCategoryHeadline">Gear leads April spend</strong>
+                      <span>The category breakdown below updates as you review and add entries.</span>
+                    </div>
+                  </div>
+                  <span class="pill coral" id="topCategoryPill">Gear</span>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div class="expenses-main-grid">
+            <div class="stack">
+              <article class="card transactions-card">
+                <div class="transaction-header">
+                  <div class="card-title">
+                    <h2>Transaction Review Flow</h2>
+                    <p>Auto-categorize, confirm in one click, change the category if needed, or split personal and business portions before filing.</p>
+                  </div>
+                  <div class="filter-row">
+                    <span class="pill neutral" id="uncategorizedPill">6 uncategorized</span>
+                    <span class="pill blue">Smart suggestions on</span>
+                  </div>
+                </div>
+                <div class="transaction-list" id="transactionList"></div>
+
+                <div class="collapse-panel">
+                  <button class="collapse-toggle" id="categorizedToggle" type="button" aria-expanded="true" aria-controls="categorizedBody">
+                    <span>Already categorized</span>
+                    <span id="categorizedToggleLabel">Collapse</span>
+                  </button>
+                  <div class="collapse-body" id="categorizedBody">
+                    <div class="transaction-list" id="categorizedList"></div>
+                  </div>
+                </div>
+              </article>
+
+              <article class="card manual-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <h2>Manual Entry</h2>
+                    <p>For cash purchases, reimbursements, or anything not coming through the bank feed. Most-used categories surface first.</p>
+                  </div>
+                  <span class="pill neutral">Quick add</span>
+                </div>
+
+                <form id="manualExpenseForm">
+                  <div class="manual-category-grid" id="manualCategoryGrid"></div>
+
+                  <div class="manual-grid">
+                    <div class="field-group">
+                      <label for="manualAmount">Amount</label>
+                      <input class="field mono" id="manualAmount" name="amount" type="number" min="0" step="0.01" placeholder="0.00" required>
+                    </div>
+                    <div class="field-group">
+                      <label for="manualDate">Date</label>
+                      <input class="field" id="manualDate" name="date" type="date" value="2026-04-07" required>
+                    </div>
+                    <div class="field-group full">
+                      <label for="manualNote">Note</label>
+                      <input class="field" id="manualNote" name="note" type="text" placeholder="Client lunch, parking garage, film scans, etc.">
+                    </div>
+                    <div class="field-group full">
+                      <label for="manualReceipt">Receipt (optional)</label>
+                      <input class="field" id="manualReceipt" name="receipt" type="file" accept="image/*,.pdf" style="padding:8px;">
+                    </div>
+                  </div>
+
+                  <div class="form-actions">
+                    <p class="muted-note">Entries added here go straight into the categorized section below and update the monthly category totals instantly.</p>
+                    <button class="button primary" type="submit">Add Expense</button>
+                  </div>
+                </form>
+              </article>
+            </div>
+
+            <div class="stack">
+              <article class="card receipt-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <h2>Receipt Matching</h2>
+                    <p>Every missing receipt is an easy tax leak. Match them while the transaction details are still obvious.</p>
+                  </div>
+                  <span class="pill yellow" id="receiptQueueBadge">3 missing</span>
+                </div>
+
+                <div class="receipt-highlight">
+                  <div>
+                    <strong id="receiptHighlightTitle">3 transactions missing receipts</strong>
+                    <span>Attach from camera roll or phone scan to lock the deduction.</span>
+                  </div>
+                  <button class="button small secondary" type="button">Attach Receipt</button>
+                </div>
+
+                <div class="receipt-list" id="receiptList"></div>
+
+                <div class="receipt-upload-zone">
+                  <div aria-hidden="true" style="font-size: 34px;">📷</div>
+                  <strong>Scan or upload a receipt</strong>
+                  <span>Drag a file here, pick one from your camera roll, or snap a photo before tossing the paper copy.</span>
+                  <div class="inline-actions" style="justify-content: center; margin-top: 16px;">
+                    <button class="button primary small" type="button">Use Camera</button>
+                    <button class="button small secondary" type="button">Upload JPG / PDF</button>
+                  </div>
+                </div>
+              </article>
+
+              <article class="card category-totals-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <h2>Category Totals</h2>
+                    <p>Running totals for the month, grouped the way you’ll want them during quarterly tax prep.</p>
+                  </div>
+                  <span class="pill coral">April</span>
+                </div>
+                <div class="category-total-list" id="categoryTotalsList"></div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="invoices" class="section" aria-labelledby="invoicesTitle">
+        <div class="section-stack">
+          <div class="section-header">
+            <div>
+              <span class="section-kicker">Client billing</span>
+              <h1 id="invoicesTitle">Invoices</h1>
+              <p>Track what has been sent, viewed, paid, or quietly aging past due. The quick create flow keeps repeat invoice types fast and consistent.</p>
+            </div>
+            <div class="header-actions">
+              <button class="button primary" type="button">＋ Create Invoice</button>
+            </div>
+          </div>
+
+          <article class="card invoice-list-card">
+            <div class="card-header">
+              <div class="card-title">
+                <h2>Invoice Stats</h2>
+                <p>A clean view of what is outstanding and how quickly clients are paying this month.</p>
+              </div>
+              <span class="pill blue">April cycle</span>
+            </div>
+            <div class="invoice-stats" id="invoiceStats"></div>
+          </article>
+
+          <div class="invoice-layout">
+            <article class="card invoice-list-card">
+              <div class="card-header">
+                <div class="card-title">
+                  <h2>Invoice List</h2>
+                  <p>Click any invoice to expand details, line items, and follow-up context.</p>
+                </div>
+                <button class="button small secondary" type="button">Export aging report</button>
+              </div>
+
+              <div class="invoice-filter-row" id="invoiceFilterRow"></div>
+              <div class="invoice-list" id="invoiceList"></div>
+            </article>
+
+            <article class="card invoice-compose-card">
+              <div class="card-header">
+                <div class="card-title">
+                  <h2>Quick Create</h2>
+                  <p>Pick a template and start from your package defaults instead of rebuilding the same invoice every time.</p>
+                </div>
+                <span class="pill neutral">Templates</span>
+              </div>
+
+              <div class="template-grid" id="templateGrid"></div>
+
+              <div class="template-preview" id="templatePreview"></div>
+
+              <div class="manual-grid" style="margin-top: 18px;">
+                <div class="field-group">
+                  <label for="invoiceClientName">Client name</label>
+                  <input class="field" id="invoiceClientName" type="text" placeholder="Type a name — picks existing or creates new" list="clientDatalist" autocomplete="off">
+                  <datalist id="clientDatalist"></datalist>
+                </div>
+                <div class="field-group">
+                  <label for="invoiceShootType">Shoot type</label>
+                  <input class="field" id="invoiceShootType" type="text" placeholder="Wedding, Portrait, etc.">
+                </div>
+                <div class="field-group">
+                  <label for="invoiceDueDate">Due Date</label>
+                  <input class="field" id="invoiceDueDate" type="date">
+                </div>
+                <div class="field-group">
+                  <label for="invoiceCustomAmount">Custom amount (optional)</label>
+                  <input class="field mono" id="invoiceCustomAmount" type="number" min="0" step="0.01" placeholder="Leave blank to use template price">
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <p class="muted-note">Type any name — if the client doesn't exist yet, they'll be added automatically. Fill in their details later in the Clients section.</p>
+                <button class="button primary" type="button" id="createInvoiceBtn">Create Invoice</button>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="clients" class="section" aria-labelledby="clientsTitle">
+        <div class="section-stack">
+          <div class="section-header">
+            <div>
+              <span class="section-kicker">Relationships</span>
+              <h1 id="clientsTitle">Clients</h1>
+              <p>See who is active, who is still a lead, and how much each relationship has generated across shoots and invoices.</p>
+            </div>
+            <div class="header-actions">
+              <button class="button primary" type="button">＋ Add Client</button>
+            </div>
+          </div>
+
+          <article class="card client-summary-card">
+            <div class="client-top-grid">
+              <div class="field-group">
+                <label for="clientSearchInput">Search clients</label>
+                <input class="field client-search" id="clientSearchInput" type="search" placeholder="Search by name, type, or note">
+              </div>
+              <div class="client-filter-row" id="clientStatusFilters"></div>
+            </div>
+
+            <div class="client-summary-strip" id="clientSummaryStrip"></div>
+          </article>
+
+          <div class="client-grid" id="clientGrid"></div>
+        </div>
+      </section>
+
+      <section id="tax-center" class="section" aria-labelledby="taxCenterTitle">
+        <div class="section-stack">
+          <div class="section-header">
+            <div>
+              <span class="section-kicker">Current year · 2026</span>
+              <h1 id="taxCenterTitle">Tax Center</h1>
+              <p>Estimated payments, deduction tracking, mileage, and upcoming deadlines pulled into one calm workspace so quarter-end doesn’t become a fire drill.</p>
+            </div>
+            <div class="header-actions">
+              <button class="button secondary" type="button">Export for accountant</button>
+            </div>
+          </div>
+
+          <div class="tax-grid">
+            <div class="stack">
+              <article class="card deductions-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <h2>Quarterly Breakdown</h2>
+                    <p>Track how much tax is estimated, how much has already been set aside, and what each quarter still needs.</p>
+                  </div>
+                  <span class="pill blue">2026 estimates</span>
+                </div>
+                <div class="quarter-grid" id="quarterGrid"></div>
+              </article>
+
+              <article class="card deductions-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <h2>Deductions Tracker</h2>
+                    <p>Your largest deduction buckets, plus a side-by-side view of itemized vs standard deduction planning.</p>
+                  </div>
+                  <span class="pill green">Up to date</span>
+                </div>
+                <div class="deduction-list" id="deductionList"></div>
+
+                <div class="comparison-card">
+                  <h3>Standard deduction vs itemized</h3>
+                  <div class="comparison-grid">
+                    <div class="comparison-item">
+                      <span>Standard</span>
+                      <strong class="mono">$15,000</strong>
+                      <p>Clean baseline if you want the simplest filing path this year.</p>
+                    </div>
+                    <div class="comparison-item">
+                      <span>Itemized tracked</span>
+                      <strong class="mono">$6,100</strong>
+                      <p>Current business deductions logged so far. Still early in the year, but this trend supports itemizing business expenses cleanly.</p>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <article class="card mileage-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <h2>Mileage Log</h2>
+                    <p>Capture travel between home, shoots, rentals, meetings, and delivery stops with the current IRS rate baked in.</p>
+                  </div>
+                  <button class="button small primary" type="button">Log Trip</button>
+                </div>
+                <div class="mileage-list" id="mileageList"></div>
+              </article>
+            </div>
+
+            <div class="stack">
+              <article class="card deadline-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <h2>Tax Deadlines</h2>
+                    <p>Absolute due dates with countdowns anchored to this dashboard’s current timeline.</p>
+                  </div>
+                  <span class="pill yellow">Upcoming</span>
+                </div>
+                <div class="deadline-list" id="deadlineList"></div>
+              </article>
+
+              <article class="card deadline-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <h2>Recommended Actions</h2>
+                    <p>Small moves that keep your quarter calm and make accountant handoff easier.</p>
+                  </div>
+                  <span class="pill neutral">This week</span>
+                </div>
+                <div class="settings-list">
+                  <div class="setting-row">
+                    <div class="setting-main">
+                      <div class="setting-icon">💸</div>
+                      <div class="setting-copy">
+                        <strong>Transfer another tax set-aside</strong>
+                        <span>Move $640 from operating cash into the tax savings bucket to keep Q2 on track.</span>
+                      </div>
+                    </div>
+                    <span class="pill blue">Suggested</span>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-main">
+                      <div class="setting-icon">🧾</div>
+                      <div class="setting-copy">
+                        <strong>Clear the last three missing receipts</strong>
+                        <span>Those are still recent enough that the reason and client context are obvious.</span>
+                      </div>
+                    </div>
+                    <span class="pill yellow">3 open</span>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-main">
+                      <div class="setting-icon">🚗</div>
+                      <div class="setting-copy">
+                        <strong>Backfill two mileage entries</strong>
+                        <span>There are gaps after the Northline Realty walk-through and the Juniper brand consult.</span>
+                      </div>
+                    </div>
+                    <span class="pill coral">Low effort</span>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="settings" class="section" aria-labelledby="settingsTitle">
+        <div class="section-stack">
+          <div class="section-header">
+            <div>
+              <span class="section-kicker">Preferences</span>
+              <h1 id="settingsTitle">Settings</h1>
+              <p>Profile, bank connections, tax defaults, category customization, and export controls. Minimal, direct, and accountant-friendly.</p>
+            </div>
+          </div>
+
+          <div class="settings-grid">
+            <article class="card settings-card">
+              <div class="card-header">
+                <div class="card-title">
+                  <h2>Profile</h2>
+                  <p>Core business identity details that appear across exports and invoices.</p>
+                </div>
+              </div>
+              <form>
+                <div class="field-group">
+                  <label for="profileName">Name</label>
+                  <input class="field" id="profileName" type="text" value="Nicole Deschamps">
+                </div>
+                <div class="field-group">
+                  <label for="businessName">Business name</label>
+                  <input class="field" id="businessName" type="text" value="LensLedger Studio">
+                </div>
+                <div class="field-group">
+                  <label for="businessEmail">Email</label>
+                  <input class="field" id="businessEmail" type="email" value="nicole@lensledger.studio">
+                </div>
+                <div class="field-group">
+                  <label for="businessLogo">Business logo (for invoices)</label>
+                  <input class="field" id="businessLogoUpload" type="file" accept="image/*" style="padding:8px;">
+                  <div id="logoPreview" style="margin-top:8px;"></div>
+                </div>
+                <div class="inline-actions">
+                  <button class="button primary" type="button" id="saveProfileBtn">Save profile</button>
+                </div>
+              </form>
+            </article>
+
+            <article class="card settings-card">
+              <div class="card-header">
+                <div class="card-title">
+                  <h2>Bank Connections</h2>
+                  <p>Linked sources for automatic transaction import and backup file imports.</p>
+                </div>
+              </div>
+              <div class="connection-list">
+                <div class="connection-row">
+                  <div class="connection-main">
+                    <div class="connection-icon">🏦</div>
+                    <div class="connection-copy">
+                      <strong>Mercury Business Checking</strong>
+                      <span>Primary business account · synced 8 minutes ago</span>
+                    </div>
+                  </div>
+                  <button class="button small secondary" type="button">Sync now</button>
+                </div>
+                <div class="connection-row">
+                  <div class="connection-main">
+                    <div class="connection-icon">💳</div>
+                    <div class="connection-copy">
+                      <strong>Amex Gold</strong>
+                      <span>CSV backup import enabled for mixed business meals and travel</span>
+                    </div>
+                  </div>
+                  <button class="button small secondary" type="button">Upload CSV</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="card settings-card">
+              <div class="card-header">
+                <div class="card-title">
+                  <h2>Tax Settings</h2>
+                  <p>Default preferences for forecasting and quarterly savings.</p>
+                </div>
+              </div>
+              <form>
+                <div class="settings-inline-grid">
+                  <div class="field-group">
+                    <label for="filingStatus">Filing status</label>
+                    <div class="select-wrap">
+                      <select id="filingStatus">
+                        <option>Single</option>
+                        <option>Married filing jointly</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="field-group">
+                    <label for="stateSetting">State</label>
+                    <div class="select-wrap">
+                      <select id="stateSetting">
+                        <option>New York</option>
+                        <option>New Jersey</option>
+                        <option>California</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="field-group">
+                  <label for="setAside">Set-aside percentage</label>
+                  <input class="field mono" id="setAside" type="text" value="28%">
+                </div>
+                <div class="inline-actions">
+                  <button class="button primary" type="button">Update tax defaults</button>
+                </div>
+              </form>
+            </article>
+
+            <article class="card settings-card">
+              <div class="card-header">
+                <div class="card-title">
+                  <h2>Categories</h2>
+                  <p>Customize expense buckets and keep exports aligned with your accountant’s preferred chart.</p>
+                </div>
+              </div>
+              <div class="category-chip-list" id="settingsCategoryChips"></div>
+            </article>
+
+            <article class="card settings-card">
+              <div class="card-header">
+                <div class="card-title">
+                  <h2>Export</h2>
+                  <p>Hand off clean reports in the format your accountant actually wants.</p>
+                </div>
+              </div>
+              <div class="settings-list">
+                <div class="setting-row">
+                  <div class="setting-main">
+                    <div class="setting-icon">📄</div>
+                    <div class="setting-copy">
+                      <strong>Monthly expense CSV</strong>
+                      <span>Category totals, merchant detail, notes, and receipt status.</span>
+                    </div>
+                  </div>
+                  <button class="button small secondary" type="button">Export CSV</button>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-main">
+                    <div class="setting-icon">🧮</div>
+                    <div class="setting-copy">
+                      <strong>Quarterly tax packet</strong>
+                      <span>Estimated payments, deductions, mileage, and invoice receivables.</span>
+                    </div>
+                  </div>
+                  <button class="button small secondary" type="button">Export PDF</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="card settings-card">
+              <div class="card-header">
+                <div class="card-title">
+                  <h2>Theme</h2>
+                  <p>Placeholder only for now. Dark mode is active and tuned for long admin sessions.</p>
+                </div>
+              </div>
+              <div class="toggle-placeholder">
+                <div>
+                  <strong style="display:block; font-size:14px; font-weight:700; margin-bottom:4px;">Dark theme</strong>
+                  <span style="color:var(--dim); font-size:12px; line-height:1.5;">Future toggle placeholder for light / dark variants.</span>
+                </div>
+                <div class="toggle-switch" aria-hidden="true"></div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    <button class="is-active" type="button" data-section-trigger="dashboard" aria-current="page">
+      <span class="mobile-nav-icon" aria-hidden="true">◫</span>
+      <span>Home</span>
+    </button>
+    <button type="button" data-section-trigger="expenses">
+      <span class="mobile-nav-icon" aria-hidden="true">⌁</span>
+      <span>Expenses</span>
+    </button>
+    <button type="button" data-section-trigger="invoices">
+      <span class="mobile-nav-icon" aria-hidden="true">☰</span>
+      <span>Invoices</span>
+    </button>
+    <button type="button" data-section-trigger="clients">
+      <span class="mobile-nav-icon" aria-hidden="true">◌</span>
+      <span>Clients</span>
+    </button>
+    <button type="button" data-section-trigger="tax-center">
+      <span class="mobile-nav-icon" aria-hidden="true">◎</span>
+      <span>Taxes</span>
+    </button>
+    <button type="button" data-section-trigger="settings">
+      <span class="mobile-nav-icon" aria-hidden="true">⚙</span>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+  <aside class="timer-panel" id="timerPanel" role="dialog" aria-modal="false" aria-labelledby="timerPanelTitle">
+    <div class="timer-panel-header">
+      <div>
+        <h2 id="timerPanelTitle">Sprint Timer</h2>
+        <p>Use this for a clean bookkeeping block: review receipts, finish categorizations, then close the loop on overdue invoices.</p>
+      </div>
+      <button class="timer-close" id="timerCloseButton" type="button" aria-label="Close sprint timer">✕</button>
+    </div>
+
+    <div class="timer-ring-wrap">
+      <svg class="timer-ring" width="220" height="220" viewBox="0 0 220 220" aria-hidden="true">
+        <circle class="timer-ring-track" cx="110" cy="110" r="84"></circle>
+        <circle class="timer-ring-progress" id="timerRingProgress" cx="110" cy="110" r="84" stroke-dasharray="527.79" stroke-dashoffset="0"></circle>
+      </svg>
+      <div class="timer-center">
+        <span>Focused work</span>
+        <div class="timer-display mono" id="timerDisplay">25:00</div>
+        <div class="timer-status" id="timerStatus">Ready</div>
+      </div>
+    </div>
+
+    <div class="timer-presets" id="timerPresetRow"></div>
+    <div class="timer-actions">
+      <button class="button primary" id="timerStartPauseButton" type="button">Start</button>
+      <button class="button secondary" id="timerResetButton" type="button">Reset</button>
+    </div>
+    <p class="timer-note" id="timerNote">Suggested sprint: clear receipts first, then confirm transactions, then send two invoice reminders.</p>
+  </aside>
+
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+<script src="js/supabase-config.js"></script>
+
+<!-- Auth: wait for session, then update UI or redirect -->
+<script>
+  // DEBUG: log everything so we can see what's happening
+  console.log('Dashboard loaded. URL hash:', window.location.hash ? 'has tokens' : 'empty');
+  console.log('Full URL:', window.location.href);
+
+  // Don't redirect immediately — give Supabase time to process OAuth tokens
+  let authResolved = false;
+
+  sb.auth.onAuthStateChange((event, session) => {
+    console.log('Auth event:', event, 'session:', !!session);
+    if (authResolved) return;
+
+    if (event === 'SIGNED_IN' && session) {
+      authResolved = true;
+      const user = session.user;
+      const name = user.user_metadata?.full_name || user.email || '';
+      const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '??';
+
+      const avatarEl = document.querySelector('.user-avatar');
+      if (avatarEl) avatarEl.textContent = initials;
+
+      const nameEl = document.querySelector('.user-meta strong');
+      if (nameEl) nameEl.textContent = name.split(' ')[0] || 'User';
+
+      const userBtn = document.querySelector('.user-button');
+      if (userBtn) {
+        userBtn.title = 'Click to sign out';
+        userBtn.onclick = () => {
+          if (confirm('Sign out of LensLedger?')) signOut();
+        };
+      }
+      // Clean up the URL hash
+      if (window.location.hash) {
+        history.replaceState(null, '', window.location.pathname);
+      }
+    }
+
+    if (event === 'INITIAL_SESSION' && session) {
+      authResolved = true;
+      // Already logged in from a previous visit
+      const user = session.user;
+      const name = user.user_metadata?.full_name || user.email || '';
+      const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '??';
+
+      const avatarEl = document.querySelector('.user-avatar');
+      if (avatarEl) avatarEl.textContent = initials;
+
+      const nameEl = document.querySelector('.user-meta strong');
+      if (nameEl) nameEl.textContent = name.split(' ')[0] || 'User';
+
+      const userBtn = document.querySelector('.user-button');
+      if (userBtn) {
+        userBtn.title = 'Click to sign out';
+        userBtn.onclick = () => {
+          if (confirm('Sign out of LensLedger?')) signOut();
+        };
+      }
+    }
+
+    if (event === 'INITIAL_SESSION' && !session && !window.location.hash) {
+      // No session AND no tokens in URL — actually not logged in
+      authResolved = true;
+      console.log('No session, no hash tokens — redirecting to login');
+      window.location.href = '/index.html';
+    }
+  });
+
+  // Safety net: if INITIAL_SESSION fires with no session but we have hash tokens,
+  // wait 5 seconds for SIGNED_IN to fire before giving up
+  setTimeout(() => {
+    if (!authResolved) {
+      console.log('Auth timeout — checking session one more time');
+      sb.auth.getSession().then(({ data: { session } }) => {
+        if (!session) {
+          console.log('Still no session after timeout — redirecting');
+          window.location.href = '/index.html';
+        }
+      });
+    }
+  }, 5000);
+</script>
+
+<!-- App logic (section switching, timer, review checklist, etc.) -->
+<script src="js/app-mockup.js"></script>
+
+<!-- App modules -->
+<script src="js/expenses.js"></script>
+<script src="js/clients.js"></script>
+<script src="js/invoices.js"></script>
+<script src="js/tax.js"></script>
+<script src="js/dashboard-stats.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/onboarding.js"></script>
+<script>
+  // Initialize all modules when auth is ready
+  sb.auth.onAuthStateChange((event, session) => {
+    if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
+      initExpenses();
+      initClients();
+      initInvoices();
+      initTax();
+      initDashboardStats();
+      initSettings();
+      // Check if first-time user needs onboarding
+      checkOnboarding();
+    }
+  });
+</script>
+
+</body>
+</html>
