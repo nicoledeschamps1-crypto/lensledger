@@ -19,6 +19,9 @@ async function checkOnboarding() {
   // If they have a business name set, they've been onboarded
   if (profile && profile.business_name) return;
 
+  // Check localStorage as fallback — skip if already dismissed
+  if (localStorage.getItem('haus-ledger-onboarded')) return;
+
   // Show onboarding
   showOnboarding(profile);
 }
@@ -206,6 +209,7 @@ function finishOnboarding(skipped) {
   const overlay = document.getElementById('onboardingOverlay');
   if (overlay) overlay.remove();
   window._obData = null;
+  localStorage.setItem('haus-ledger-onboarded', 'true');
 
   if (!skipped) {
     // Reload modules with new profile data
