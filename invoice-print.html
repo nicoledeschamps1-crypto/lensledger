@@ -223,6 +223,7 @@
       .from('invoices')
       .select('*, client:clients(*), items:invoice_items(*)')
       .eq('id', invoiceId)
+      .eq('user_id', session.user.id)
       .single();
 
     if (error || !inv) { document.body.innerHTML = '<p>Invoice not found.</p>'; return; }
@@ -230,7 +231,7 @@
     // Load profile
     const { data: profile } = await sb
       .from('profiles')
-      .select('*')
+      .select('business_name, full_name, email')
       .eq('id', session.user.id)
       .single();
 

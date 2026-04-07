@@ -96,7 +96,7 @@ function renderDeductionList() {
     ? sorted.map(c => `
         <div style="margin-bottom:14px;">
           <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;">
-            <strong>${c.name}</strong>
+            <strong>${escapeHtml(c.name)}</strong>
             <span class="mono">$${c.total.toFixed(0)}</span>
           </div>
           <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
@@ -142,7 +142,7 @@ function renderMileageList() {
     return `
       <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;">
         <span style="color:var(--dim);min-width:90px;">${dateStr}</span>
-        <span style="flex:1;">${m.start_location || ''} → ${m.end_location || ''}</span>
+        <span style="flex:1;">${escapeHtml(m.start_location || '')} → ${escapeHtml(m.end_location || '')}</span>
         <span class="mono" style="min-width:50px;">${Number(m.miles).toFixed(1)} mi</span>
         <span class="mono" style="color:var(--green);min-width:60px;">$${Number(m.deductible_amount || 0).toFixed(2)}</span>
         <button class="button small ghost" onclick="deleteMileage('${m.id}')" style="opacity:0.5;">x</button>
@@ -230,7 +230,22 @@ async function saveMileage() {
 
 async function deleteMileage(id) {
   if (!confirm('Delete this trip?')) return;
-  await sb.from('mileage_log').delete().eq('id', id);
+
+  const user = await getUser();
+  if (!user) return;
+
+  const { error } = await sb
+    .from('mileage_log')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', user.id);
+
+  if (error) {
+    console.error('Failed to delete mileage:', error.message);
+    alert('Failed to delete trip.');
+    return;
+  }
+
   await loadMileage();
   renderMileageList();
 }

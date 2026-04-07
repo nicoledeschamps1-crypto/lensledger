@@ -9,6 +9,25 @@ const SUPABASE_ANON_KEY = 'sb_publishable_D2gzu6hfVUktdlEfr2NMGw_irMPG7eq';
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// ─── Security Helpers ───────────────────────────────────────
+
+function escapeHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+const ALLOWED_UPLOAD_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'application/pdf'];
+
+function validateFileType(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+  const allowedExts = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'heic', 'heif', 'pdf'];
+  return ALLOWED_UPLOAD_TYPES.includes(file.type) || allowedExts.includes(ext);
+}
+
 // ─── Auth Helpers ───────────────────────────────────────────
 
 async function getSession() {

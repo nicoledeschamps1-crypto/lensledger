@@ -99,18 +99,18 @@ function renderClientGrid() {
       return `
         <div class="card" style="padding:20px;cursor:pointer;" onclick="editClient('${c.id}')">
           <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
-            <div style="width:44px;height:44px;border-radius:12px;background:${color}22;color:${color};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;">${initials}</div>
+            <div style="width:44px;height:44px;border-radius:12px;background:${color}22;color:${color};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;">${escapeHtml(initials)}</div>
             <div style="flex:1;min-width:0;">
-              <strong style="font-size:15px;">${c.name}</strong>
-              <div style="font-size:12px;color:var(--dim);">${c.photography_type || 'Photography'}</div>
+              <strong style="font-size:15px;">${escapeHtml(c.name)}</strong>
+              <div style="font-size:12px;color:var(--dim);">${escapeHtml(c.photography_type || 'Photography')}</div>
             </div>
-            <span class="pill small ${statusClass}">${c.status}</span>
+            <span class="pill small ${statusClass}">${escapeHtml(c.status)}</span>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:var(--dim);">
-            <div><span style="display:block;color:var(--muted);">Email</span>${c.email || '—'}</div>
-            <div><span style="display:block;color:var(--muted);">Phone</span>${c.phone || '—'}</div>
+            <div><span style="display:block;color:var(--muted);">Email</span>${escapeHtml(c.email || '—')}</div>
+            <div><span style="display:block;color:var(--muted);">Phone</span>${escapeHtml(c.phone || '—')}</div>
           </div>
-          ${c.notes ? `<div style="margin-top:10px;font-size:12px;color:var(--dim);border-top:1px solid var(--border);padding-top:10px;">${c.notes}</div>` : ''}
+          ${c.notes ? `<div style="margin-top:10px;font-size:12px;color:var(--dim);border-top:1px solid var(--border);padding-top:10px;">${escapeHtml(c.notes)}</div>` : ''}
         </div>`;
     }).join('')}
   </div>`;
@@ -135,19 +135,19 @@ function showAddClientModal(existingClient) {
         <div class="manual-grid" style="gap:12px;">
           <div class="field-group full">
             <label for="clientName">Name *</label>
-            <input class="field" id="clientName" type="text" value="${c.name || ''}" required placeholder="Full name or business name">
+            <input class="field" id="clientName" type="text" value="${escapeHtml(c.name || '')}" required placeholder="Full name or business name">
           </div>
           <div class="field-group">
             <label for="clientEmail">Email</label>
-            <input class="field" id="clientEmail" type="email" value="${c.email || ''}" placeholder="email@example.com">
+            <input class="field" id="clientEmail" type="email" value="${escapeHtml(c.email || '')}" placeholder="email@example.com">
           </div>
           <div class="field-group">
             <label for="clientPhone">Phone</label>
-            <input class="field" id="clientPhone" type="tel" value="${c.phone || ''}" placeholder="(555) 123-4567">
+            <input class="field" id="clientPhone" type="tel" value="${escapeHtml(c.phone || '')}" placeholder="(555) 123-4567">
           </div>
           <div class="field-group">
             <label for="clientType">Photography Type</label>
-            <input class="field" id="clientType" type="text" value="${c.photography_type || ''}" placeholder="Wedding, Portrait, Commercial...">
+            <input class="field" id="clientType" type="text" value="${escapeHtml(c.photography_type || '')}" placeholder="Wedding, Portrait, Commercial...">
           </div>
           <div class="field-group">
             <label for="clientStatus">Status</label>
@@ -159,7 +159,7 @@ function showAddClientModal(existingClient) {
           </div>
           <div class="field-group full">
             <label for="clientNotes">Notes</label>
-            <input class="field" id="clientNotes" type="text" value="${c.notes || ''}" placeholder="Any notes about this client...">
+            <input class="field" id="clientNotes" type="text" value="${escapeHtml(c.notes || '')}" placeholder="Any notes about this client...">
           </div>
         </div>
         <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
@@ -200,7 +200,7 @@ async function saveClient(existingId) {
 
   let error;
   if (existingId) {
-    ({ error } = await sb.from('clients').update(data).eq('id', existingId));
+    ({ error } = await sb.from('clients').update(data).eq('id', existingId).eq('user_id', user.id));
   } else {
     ({ error } = await sb.from('clients').insert(data));
   }
@@ -223,7 +223,10 @@ async function editClient(id) {
 async function deleteClient(id) {
   if (!confirm('Delete this client? This cannot be undone.')) return;
 
-  const { error } = await sb.from('clients').delete().eq('id', id);
+  const user = await getUser();
+  if (!user) return;
+
+  const { error } = await sb.from('clients').delete().eq('id', id).eq('user_id', user.id);
   if (error) {
     console.error('Failed to delete client:', error.message);
     alert('Failed to delete client.');

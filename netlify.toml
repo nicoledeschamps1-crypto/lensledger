@@ -4,6 +4,15 @@
   publish = "."
   # No build command needed — static files only
 
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-XSS-Protection = "1; mode=block"
+
 # Redirect root to index.html
 [[redirects]]
   from = "/"

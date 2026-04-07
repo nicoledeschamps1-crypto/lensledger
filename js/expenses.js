@@ -39,7 +39,7 @@ function renderCategoryGrid() {
   grid.innerHTML = _categories.map(cat => `
     <button type="button" class="tag-button ${_selectedCategory === cat.id ? 'is-active' : ''}"
             data-category-id="${cat.id}" onclick="selectCategory('${cat.id}')">
-      ${cat.name}
+      ${escapeHtml(cat.name)}
     </button>
   `).join('');
 }
@@ -106,7 +106,7 @@ function renderTransactionRow(t, isCategorized) {
   const hasReceipt = t.receipts && t.receipts.length > 0;
   const amountStr = `$${Math.abs(t.amount).toFixed(2)}`;
   const receiptBadge = hasReceipt
-    ? `<span class="pill small green" style="cursor:pointer;" onclick="previewReceipt('${t.receipts[0].storage_path}', '${t.receipts[0].filename || 'Receipt'}')">Receipt attached — view</span>`
+    ? `<span class="pill small green" style="cursor:pointer;" onclick="previewReceipt('${t.receipts[0].storage_path}', '${escapeHtml(t.receipts[0].filename || 'Receipt')}')">Receipt attached — view</span>`
     : `<label class="pill small yellow" style="cursor:pointer;">Attach receipt <input type="file" accept="image/*,.pdf" style="display:none;" onchange="handleInlineReceipt('${t.id}', this)"></label>`;
 
   if (isCategorized) {
@@ -114,12 +114,12 @@ function renderTransactionRow(t, isCategorized) {
       <div class="transaction-row categorized" data-id="${t.id}" style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--border);">
         <div style="min-width:50px;color:var(--dim);font-size:13px;">${dateStr}</div>
         <div style="flex:1;min-width:0;">
-          <strong style="font-size:14px;">${t.description || t.merchant || 'Expense'}</strong>
-          <div style="font-size:12px;color:var(--dim);margin-top:2px;">${cat ? cat.name : 'Uncategorized'}</div>
+          <strong style="font-size:14px;">${escapeHtml(t.description || t.merchant || 'Expense')}</strong>
+          <div style="font-size:12px;color:var(--dim);margin-top:2px;">${cat ? escapeHtml(cat.name) : 'Uncategorized'}</div>
         </div>
         <span class="mono" style="font-size:14px;font-weight:600;">$${Math.abs(t.amount).toFixed(2)}</span>
         <div style="display:flex;gap:6px;align-items:center;">
-          ${cat ? `<span class="pill small" style="background:${cat.color}22;color:${cat.color}">${cat.name}</span>` : ''}
+          ${cat ? `<span class="pill small" style="background:${cat.color}22;color:${cat.color}">${escapeHtml(cat.name)}</span>` : ''}
           ${receiptBadge}
         </div>
         <button class="button small ghost" onclick="deleteTransaction('${t.id}')" title="Delete" style="opacity:0.5;">x</button>
@@ -130,13 +130,13 @@ function renderTransactionRow(t, isCategorized) {
     <div class="transaction-row uncategorized" data-id="${t.id}" style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--border);">
       <div style="min-width:50px;color:var(--dim);font-size:13px;">${dateStr}</div>
       <div style="flex:1;min-width:0;">
-        <strong style="font-size:14px;">${t.description || t.merchant || 'Expense'}</strong>
+        <strong style="font-size:14px;">${escapeHtml(t.description || t.merchant || 'Expense')}</strong>
       </div>
       <span class="mono" style="font-size:14px;font-weight:600;">$${Math.abs(t.amount).toFixed(2)}</span>
       <div style="display:flex;gap:6px;align-items:center;">
         <select class="field small" onchange="categorizeTransaction('${t.id}', this.value)" style="min-width:140px;">
           <option value="">Select category...</option>
-          ${_categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+          ${_categories.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('')}
         </select>
         ${receiptBadge}
       </div>
@@ -175,7 +175,7 @@ async function previewReceipt(storagePath, filename) {
   modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;cursor:pointer;';
   modal.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;width:100%;max-width:700px;margin-bottom:12px;">
-      <span style="color:var(--dim);font-size:13px;">${filename}</span>
+      <span style="color:var(--dim);font-size:13px;">${escapeHtml(filename)}</span>
       <button style="color:var(--text);background:var(--surface-raised);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:13px;cursor:pointer;" onclick="document.getElementById('receiptPreviewModal').remove()">Close</button>
     </div>
     <div style="cursor:default;" onclick="event.stopPropagation();">
@@ -212,10 +212,14 @@ async function categorizeTransaction(transactionId, categoryId) {
 async function deleteTransaction(id) {
   if (!confirm('Delete this transaction?')) return;
 
+  const user = await getUser();
+  if (!user) return;
+
   const { error } = await sb
     .from('transactions')
     .delete()
-    .eq('id', id);
+    .eq('id', id)
+    .eq('user_id', user.id);
 
   if (error) {
     console.error('Failed to delete:', error.message);
@@ -318,9 +322,9 @@ function renderCategoryTotals() {
   listEl.innerHTML = sorted.length > 0
     ? sorted.map(c => `
         <div class="category-total-row">
-          <span class="category-icon" style="background:${c.color}22;color:${c.color}">${c.icon}</span>
+          <span class="category-icon" style="background:${c.color}22;color:${c.color}">${escapeHtml(c.icon)}</span>
           <div class="category-total-info">
-            <strong>${c.name}</strong>
+            <strong>${escapeHtml(c.name)}</strong>
             <span>Running total for April</span>
           </div>
           <span class="mono" style="color:${c.color}"><strong>$${c.total.toFixed(2)}</strong></span>
@@ -372,6 +376,11 @@ function updateExpensesSummary() {
 async function uploadReceipt(transactionId, file) {
   const user = await getUser();
   if (!user) return;
+
+  if (!validateFileType(file)) {
+    alert('Only images and PDFs are allowed.');
+    return;
+  }
 
   console.log('uploadReceipt: starting', file.name, file.type, file.size);
 
@@ -504,11 +513,22 @@ async function importCSV(file) {
     const amount = Math.abs(parseFloat(cols[amountIdx]));
     if (isNaN(amount) || amount === 0) continue;
 
+    // Validate date format (YYYY-MM-DD or common date formats)
+    const rawDate = cols[dateIdx];
+    const parsedDate = new Date(rawDate);
+    if (!rawDate || isNaN(parsedDate.getTime())) continue;
+
+    // Normalize to YYYY-MM-DD
+    const year = parsedDate.getFullYear();
+    const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+    const day = String(parsedDate.getDate()).padStart(2, '0');
+    const normalizedDate = `${year}-${month}-${day}`;
+
     rows.push({
       user_id: user.id,
       type: 'expense',
       amount: amount,
-      date: cols[dateIdx],
+      date: normalizedDate,
       description: descIdx >= 0 ? cols[descIdx] : '',
       merchant: descIdx >= 0 ? cols[descIdx] : '',
       is_business: true,

@@ -49,7 +49,7 @@ async function saveProfile() {
   const businessName = document.getElementById('businessName').value.trim();
   const email = document.getElementById('businessEmail').value.trim();
   const taxStr = document.getElementById('setAside').value.replace('%', '').trim();
-  const taxRate = parseFloat(taxStr) || 25;
+  const taxRate = Math.min(Math.max(parseFloat(taxStr) || 25, 0), 60);
 
   const { error } = await sb
     .from('profiles')

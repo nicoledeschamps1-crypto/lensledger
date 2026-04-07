@@ -246,13 +246,16 @@
     redirectIfLoggedIn();
   }
 
-  function handleGoogleSignIn() {
+  async function handleGoogleSignIn() {
     document.getElementById('loadingMsg').classList.add('visible');
     document.getElementById('googleSignIn').disabled = true;
-    // Direct redirect — no async/await so Chrome doesn't block it
-    window.location.href =
-      SUPABASE_URL + '/auth/v1/authorize?provider=google&redirect_to=' +
-      encodeURIComponent(window.location.origin + '/dashboard.html');
+    const { error } = await signInWithGoogle();
+    if (error) {
+      document.getElementById('errorMsg').textContent = error.message || 'Sign-in failed.';
+      document.getElementById('errorMsg').classList.add('visible');
+      document.getElementById('loadingMsg').classList.remove('visible');
+      document.getElementById('googleSignIn').disabled = false;
+    }
   }
 </script>
 

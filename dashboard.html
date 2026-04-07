@@ -11,6 +11,9 @@
 </head>
 <body>
 
+<!-- Loading overlay — hidden once auth resolves -->
+<div id="authLoadingOverlay" style="position:fixed;inset:0;z-index:999999;background:var(--bg,#131318);display:flex;align-items:center;justify-content:center;font-family:Inter,sans-serif;color:#9898a8;font-size:14px;">Loading...</div>
+
 <div id="liveRegion" class="sr-only" aria-live="polite"></div>
 
   <div class="app-shell">
@@ -971,9 +974,7 @@
 
 <!-- Auth: wait for session, then update UI or redirect -->
 <script>
-  // DEBUG: log everything so we can see what's happening
-  console.log('Dashboard loaded. URL hash:', window.location.hash ? 'has tokens' : 'empty');
-  console.log('Full URL:', window.location.href);
+  // Auth state tracking
 
   // Don't redirect immediately — give Supabase time to process OAuth tokens
   let authResolved = false;
@@ -984,6 +985,7 @@
 
     if (event === 'SIGNED_IN' && session) {
       authResolved = true;
+      const _overlay = document.getElementById('authLoadingOverlay'); if (_overlay) _overlay.remove();
       const user = session.user;
       const name = user.user_metadata?.full_name || user.email || '';
       const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '??';
@@ -1009,6 +1011,7 @@
 
     if (event === 'INITIAL_SESSION' && session) {
       authResolved = true;
+      const _overlay = document.getElementById('authLoadingOverlay'); if (_overlay) _overlay.remove();
       // Already logged in from a previous visit
       const user = session.user;
       const name = user.user_metadata?.full_name || user.email || '';
@@ -1032,6 +1035,7 @@
     if (event === 'INITIAL_SESSION' && !session && !window.location.hash) {
       // No session AND no tokens in URL — actually not logged in
       authResolved = true;
+      const _overlay = document.getElementById('authLoadingOverlay'); if (_overlay) _overlay.remove();
       console.log('No session, no hash tokens — redirecting to login');
       window.location.href = '/index.html';
     }

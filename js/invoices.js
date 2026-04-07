@@ -100,24 +100,26 @@ function renderInvoiceList() {
   }
 
   el.innerHTML = filtered.map(inv => {
-    const clientName = inv.client ? inv.client.name : 'No client';
+    const clientName = inv.client ? escapeHtml(inv.client.name) : 'No client';
     const statusColors = { draft: 'neutral', sent: 'blue', viewed: 'blue', paid: 'green', overdue: 'red', cancelled: 'neutral' };
     const statusClass = statusColors[inv.status] || 'neutral';
     const issueDate = inv.issue_date ? new Date(inv.issue_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
     const dueDate = inv.due_date ? new Date(inv.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+    const safeInvoiceNumber = escapeHtml(inv.invoice_number);
+    const safeStatus = escapeHtml(inv.status);
 
     return `
       <div style="display:flex;align-items:center;gap:14px;padding:14px;border-bottom:1px solid var(--border);cursor:pointer;" onclick="editInvoice('${inv.id}')">
         <div style="flex:1;min-width:0;">
           <strong style="font-size:14px;">${clientName}</strong>
-          <div style="font-size:12px;color:var(--dim);">${inv.invoice_number}</div>
+          <div style="font-size:12px;color:var(--dim);">${safeInvoiceNumber}</div>
         </div>
         <span class="mono" style="font-size:14px;font-weight:600;">$${Number(inv.total).toFixed(2)}</span>
         <div style="font-size:12px;color:var(--dim);min-width:90px;text-align:right;">
           <div>${issueDate}</div>
           <div>${dueDate ? 'Due ' + dueDate : ''}</div>
         </div>
-        <span class="pill small ${statusClass}">${inv.status.toUpperCase()}</span>
+        <span class="pill small ${statusClass}">${safeStatus.toUpperCase()}</span>
         <div style="display:flex;gap:4px;">
           <button class="button small secondary" onclick="event.stopPropagation();window.open('/invoice-print.html?id=${inv.id}','_blank')">PDF</button>
           ${inv.status === 'sent' || inv.status === 'viewed' || inv.status === 'overdue' ? `<button class="button small primary" onclick="event.stopPropagation();markInvoicePaid('${inv.id}')">Mark Paid</button>` : ''}
@@ -183,7 +185,7 @@ function populateClientDatalist() {
 
   datalist.innerHTML = _clients
     .filter(c => c.status !== 'archived')
-    .map(c => `<option value="${c.name}">`)
+    .map(c => `<option value="${escapeHtml(c.name)}">`)
     .join('');
 }
 
@@ -249,7 +251,8 @@ async function createInvoice() {
     subtotal = templateItems.reduce((s, i) => s + i.price, 0);
   }
 
-  const invoiceNumber = `LL-${String(_nextInvoiceNum).padStart(4, '0')}`;
+  const year = new Date().getFullYear();
+  const invoiceNumber = `LL-${year}-${Math.random().toString(16).slice(2, 6).toUpperCase()}`;
 
   const { data: invoice, error } = await sb
     .from('invoices')
@@ -316,7 +319,8 @@ async function markInvoicePaid(id) {
       status: 'paid',
       paid_date: new Date().toISOString().split('T')[0]
     })
-    .eq('id', id);
+    .eq('id', id)
+    .eq('user_id', user.id);
 
   if (error) {
     console.error('Failed to mark paid:', error.message);
@@ -329,7 +333,7 @@ async function markInvoicePaid(id) {
     type: 'income',
     amount: Number(invoice.total),
     date: new Date().toISOString().split('T')[0],
-    description: `Invoice ${invoice.invoice_number} paid`,
+    description: `Invoice ${escapeHtml(invoice.invoice_number)} paid`,
     invoice_id: id,
     is_business: true,
     business_percentage: 100
@@ -347,7 +351,9 @@ async function editInvoice(id) {
   const existing = document.getElementById('invoiceModal');
   if (existing) existing.remove();
 
-  const clientName = inv.client ? inv.client.name : 'No client';
+  const clientName = inv.client ? escapeHtml(inv.client.name) : 'No client';
+  const safeInvoiceNumber = escapeHtml(inv.invoice_number);
+  const safeStatus = escapeHtml(inv.status);
   const items = inv.items || [];
 
   const modal = document.createElement('div');
@@ -357,16 +363,16 @@ async function editInvoice(id) {
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:32px;width:100%;max-width:520px;cursor:default;" onclick="event.stopPropagation();">
       <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:20px;">
         <div>
-          <h2 style="font-size:18px;">${inv.invoice_number}</h2>
+          <h2 style="font-size:18px;">${safeInvoiceNumber}</h2>
           <div style="font-size:13px;color:var(--dim);margin-top:4px;">${clientName}</div>
         </div>
-        <span class="pill ${inv.status === 'paid' ? 'green' : inv.status === 'overdue' ? 'red' : 'blue'}">${inv.status.toUpperCase()}</span>
+        <span class="pill ${inv.status === 'paid' ? 'green' : inv.status === 'overdue' ? 'red' : 'blue'}">${safeStatus.toUpperCase()}</span>
       </div>
 
       <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px;">
         ${items.map(item => `
           <div style="display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;">
-            <span>${item.description}</span>
+            <span>${escapeHtml(item.description)}</span>
             <span class="mono">$${Number(item.total).toFixed(2)}</span>
           </div>
         `).join('')}
@@ -403,6 +409,9 @@ async function editInvoice(id) {
 }
 
 async function updateInvoice(id) {
+  const user = await getUser();
+  if (!user) return;
+
   const newStatus = document.getElementById('invoiceStatusSelect').value;
   const newDueDate = document.getElementById('invoiceDueDateEdit').value;
 
@@ -411,7 +420,7 @@ async function updateInvoice(id) {
     update.paid_date = new Date().toISOString().split('T')[0];
   }
 
-  const { error } = await sb.from('invoices').update(update).eq('id', id);
+  const { error } = await sb.from('invoices').update(update).eq('id', id).eq('user_id', user.id);
   if (error) {
     console.error('Failed to update invoice:', error.message);
     return;
@@ -423,13 +432,12 @@ async function updateInvoice(id) {
   if (newStatus === 'paid') {
     const inv = _invoices.find(i => i.id === id);
     if (inv) {
-      const user = await getUser();
       await sb.from('transactions').insert({
         user_id: user.id,
         type: 'income',
         amount: Number(inv.total),
         date: new Date().toISOString().split('T')[0],
-        description: `Invoice ${inv.invoice_number} paid`,
+        description: `Invoice ${escapeHtml(inv.invoice_number)} paid`,
         invoice_id: id,
         is_business: true,
         business_percentage: 100
@@ -443,7 +451,10 @@ async function updateInvoice(id) {
 async function deleteInvoice(id) {
   if (!confirm('Delete this invoice? This cannot be undone.')) return;
 
-  const { error } = await sb.from('invoices').delete().eq('id', id);
+  const user = await getUser();
+  if (!user) return;
+
+  const { error } = await sb.from('invoices').delete().eq('id', id).eq('user_id', user.id);
   if (error) {
     console.error('Failed to delete invoice:', error.message);
     return;
