@@ -126,8 +126,7 @@
               <p>Your money admin is calm and current. Income is landing, expenses are mostly categorized, and there are a few receipts plus two overdue invoices worth clearing before Friday.</p>
             </div>
             <div class="header-actions">
-              <button class="button primary" type="button">📷 Snap Receipt</button>
-              <button class="button secondary" type="button">＋ Log Expense</button>
+              <button class="button primary" type="button" onclick="document.querySelector('[data-section-trigger=expenses]').click()">+ Log Expense</button>
             </div>
           </div>
 
@@ -135,37 +134,37 @@
             <article class="card stat-card green">
               <div class="stat-card-header">
                 <span class="stat-label">Income</span>
-                <span class="stat-trend green">+18% vs Mar</span>
+                <span class="stat-trend green" id="dashIncomeTrend"></span>
               </div>
-              <div class="stat-value mono green">$4,850</div>
-              <p class="stat-footnote">Four client payments landed this month, with the strongest lift coming from wedding retainers and brand mini shoots.</p>
+              <div class="stat-value mono green" id="dashIncomeValue">$0</div>
+              <p class="stat-footnote" id="dashIncomeNote">This month's income from paid invoices and deposits.</p>
             </article>
 
             <article class="card stat-card yellow">
               <div class="stat-card-header">
                 <span class="stat-label">Pending</span>
-                <span class="stat-trend yellow">3 invoices open</span>
+                <span class="stat-trend yellow" id="dashPendingTrend"></span>
               </div>
-              <div class="stat-value mono yellow">$1,200</div>
-              <p class="stat-footnote">Two overdue reminders are ready to send and one viewed invoice is likely to convert after a gentle follow-up.</p>
+              <div class="stat-value mono yellow" id="dashPendingValue">$0</div>
+              <p class="stat-footnote" id="dashPendingNote">Outstanding invoices awaiting payment.</p>
             </article>
 
             <article class="card stat-card coral">
               <div class="stat-card-header">
                 <span class="stat-label">Expenses</span>
-                <span class="stat-trend coral">12 new items</span>
+                <span class="stat-trend coral" id="dashExpensesTrend"></span>
               </div>
-              <div class="stat-value mono coral">$1,340</div>
-              <p class="stat-footnote">Travel and gear were the largest categories this month, with recurring software spend staying stable and predictable.</p>
+              <div class="stat-value mono coral" id="dashExpensesValue">$0</div>
+              <p class="stat-footnote" id="dashExpensesNote">This month's business expenses.</p>
             </article>
 
             <article class="card stat-card blue">
               <div class="stat-card-header">
                 <span class="stat-label">Profit</span>
-                <span class="stat-trend blue">72.4% margin</span>
+                <span class="stat-trend blue" id="dashProfitTrend"></span>
               </div>
-              <div class="stat-value mono blue">$3,510</div>
-              <p class="stat-footnote">Profit stayed healthy because home office and marketing spend were lighter than forecast heading into spring bookings.</p>
+              <div class="stat-value mono blue" id="dashProfitValue">$0</div>
+              <p class="stat-footnote" id="dashProfitNote">Income minus expenses this month.</p>
             </article>
           </div>
 
@@ -939,9 +938,11 @@
 
       const userBtn = document.querySelector('.user-button');
       if (userBtn) {
-        userBtn.title = 'Click to sign out';
+        userBtn.title = 'Go to Settings';
         userBtn.onclick = () => {
-          if (confirm('Sign out of Haus Ledger?')) signOut();
+          // Navigate to settings section
+          const trigger = document.querySelector('[data-section-trigger="settings"]');
+          if (trigger) trigger.click();
         };
       }
       // Clean up the URL hash
@@ -972,9 +973,10 @@
 
       const userBtn = document.querySelector('.user-button');
       if (userBtn) {
-        userBtn.title = 'Click to sign out';
+        userBtn.title = 'Go to Settings';
         userBtn.onclick = () => {
-          if (confirm('Sign out of Haus Ledger?')) signOut();
+          const trigger = document.querySelector('[data-section-trigger="settings"]');
+          if (trigger) trigger.click();
         };
       }
     }
