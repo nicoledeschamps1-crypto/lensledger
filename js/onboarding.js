@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// LensLedger — Onboarding Flow for First-Time Users
+// Haus Ledger — Onboarding Flow for First-Time Users
 // ═══════════════════════════════════════════════════════════════
 
 let _onboardingStep = 0;
@@ -26,7 +26,7 @@ async function checkOnboarding() {
 function showOnboarding(profile) {
   const overlay = document.createElement('div');
   overlay.id = 'onboardingOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;overflow-y:auto;';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#131318;display:flex;align-items:center;justify-content:center;padding:24px;overflow-y:auto;color:#e8e8ed;font-family:Inter,-apple-system,sans-serif;';
 
   overlay.innerHTML = `
     <div style="width:100%;max-width:520px;">
@@ -34,8 +34,8 @@ function showOnboarding(profile) {
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:24px;">
         <div id="onboardingDots" style="display:flex;gap:6px;"></div>
         <div style="display:flex;gap:10px;">
-          <button class="button ghost" id="onboardSkip" onclick="finishOnboarding(true)" style="font-size:13px;color:var(--dim);">Skip for now</button>
-          <button class="button primary" id="onboardNext" onclick="nextOnboardingStep()">Continue</button>
+          <button id="onboardSkip" onclick="finishOnboarding(true)" style="font-size:13px;color:#9898a8;background:none;border:none;cursor:pointer;padding:10px 16px;">Skip for now</button>
+          <button id="onboardNext" onclick="nextOnboardingStep()" style="padding:10px 24px;background:#7c6df0;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;">Continue</button>
         </div>
       </div>
     </div>
@@ -64,8 +64,8 @@ function renderOnboardingStep(profile) {
       nextBtn.textContent = 'Get started';
       content.innerHTML = `
         <div style="text-align:center;margin-bottom:32px;">
-          <div style="font-size:48px;margin-bottom:16px;">Welcome to LensLedger</div>
-          <p style="font-size:16px;color:var(--dim);line-height:1.6;max-width:400px;margin:0 auto;">
+          <div style="font-size:36px;font-weight:700;color:#e8e8ed;margin-bottom:16px;letter-spacing:-0.5px;">Welcome to Haus Ledger</div>
+          <p style="font-size:16px;color:#9898a8;line-height:1.6;max-width:420px;margin:0 auto;">
             Simple bookkeeping built for freelance photographers. Let's get your studio set up in about 60 seconds.
           </p>
         </div>
@@ -76,19 +76,19 @@ function renderOnboardingStep(profile) {
       nextBtn.textContent = 'Continue';
       content.innerHTML = `
         <div style="margin-bottom:8px;">
-          <h2 style="font-size:20px;margin-bottom:4px;">About your studio</h2>
-          <p style="color:var(--dim);font-size:14px;">This appears on your invoices and exports.</p>
+          <h2 style="font-size:20px;margin-bottom:4px;color:#e8e8ed;">About your studio</h2>
+          <p style="color:#9898a8;font-size:14px;">This appears on your invoices and exports.</p>
         </div>
         <div style="display:flex;flex-direction:column;gap:14px;margin-top:20px;">
-          <div class="field-group">
+          <div style="margin-bottom:4px;">
             <label for="obName">Your name</label>
             <input class="field" id="obName" type="text" value="${userName}" placeholder="Full name" autofocus>
           </div>
-          <div class="field-group">
+          <div style="margin-bottom:4px;">
             <label for="obBusiness">Business name</label>
             <input class="field" id="obBusiness" type="text" placeholder="e.g. Sabrina Lee Photography">
           </div>
-          <div class="field-group">
+          <div style="margin-bottom:4px;">
             <label for="obEmail">Contact email</label>
             <input class="field" id="obEmail" type="email" placeholder="For invoices and client communication">
           </div>
@@ -100,12 +100,12 @@ function renderOnboardingStep(profile) {
       nextBtn.textContent = 'Continue';
       content.innerHTML = `
         <div style="margin-bottom:8px;">
-          <h2 style="font-size:20px;margin-bottom:4px;">What do you shoot?</h2>
-          <p style="color:var(--dim);font-size:14px;">This helps us set up invoice templates. Pick all that apply.</p>
+          <h2 style="font-size:20px;margin-bottom:4px;color:#e8e8ed;">What do you shoot?</h2>
+          <p style="color:#9898a8;font-size:14px;">This helps us set up invoice templates. Pick all that apply.</p>
         </div>
         <div id="obShootTypes" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;">
           ${['Wedding', 'Portrait', 'Commercial', 'Event', 'Brand', 'Real Estate', 'Food', 'Fashion', 'Other'].map(t =>
-            `<button class="tag-button" type="button" onclick="this.classList.toggle('is-active')" data-type="${t}">${t}</button>`
+            `<button type="button" data-type="${t}" onclick="this.dataset.selected = this.dataset.selected === 'true' ? 'false' : 'true'; this.style.background = this.dataset.selected === 'true' ? 'rgba(124,109,240,0.15)' : 'rgba(255,255,255,0.05)'; this.style.borderColor = this.dataset.selected === 'true' ? 'rgba(124,109,240,0.3)' : 'rgba(255,255,255,0.1)'; this.style.color = this.dataset.selected === 'true' ? '#7c6df0' : '#e8e8ed';" data-selected="false" style="padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:#e8e8ed;font-size:13px;cursor:pointer;">${t}</button>`
           ).join('')}
         </div>
       `;
@@ -115,23 +115,23 @@ function renderOnboardingStep(profile) {
       nextBtn.textContent = 'Finish setup';
       content.innerHTML = `
         <div style="margin-bottom:8px;">
-          <h2 style="font-size:20px;margin-bottom:4px;">Tax set-aside</h2>
-          <p style="color:var(--dim);font-size:14px;">As a freelancer, you owe estimated taxes quarterly. We'll help you track how much to set aside.</p>
+          <h2 style="font-size:20px;margin-bottom:4px;color:#e8e8ed;">Tax set-aside</h2>
+          <p style="color:#9898a8;font-size:14px;">As a freelancer, you owe estimated taxes quarterly. We'll help you track how much to set aside.</p>
         </div>
         <div style="margin-top:20px;">
-          <div class="field-group">
+          <div style="margin-bottom:4px;">
             <label for="obTaxRate">Set-aside percentage</label>
             <input class="field mono" id="obTaxRate" type="number" min="0" max="50" value="25" style="max-width:120px;">
-            <p style="font-size:12px;color:var(--dim);margin-top:6px;">
+            <p style="font-size:12px;color:#9898a8;margin-top:6px;">
               Most freelance photographers use 25-30%. This isn't your actual tax rate — it's how much of each payment you set aside for taxes. You can change this anytime in Settings.
             </p>
           </div>
         </div>
         <div style="margin-top:20px;">
-          <div class="field-group">
+          <div style="margin-bottom:4px;">
             <label for="obLogo">Business logo (optional)</label>
             <input class="field" id="obLogo" type="file" accept="image/*" style="padding:8px;">
-            <p style="font-size:12px;color:var(--dim);margin-top:6px;">Shows on your invoices. You can add this later in Settings too.</p>
+            <p style="font-size:12px;color:#9898a8;margin-top:6px;">Shows on your invoices. You can add this later in Settings too.</p>
           </div>
         </div>
       `;
@@ -157,7 +157,7 @@ async function nextOnboardingStep() {
   }
 
   if (_onboardingStep === 2) {
-    const selected = document.querySelectorAll('#obShootTypes .tag-button.is-active');
+    const selected = document.querySelectorAll('#obShootTypes button[data-selected="true"]');
     window._obData = window._obData || {};
     window._obData.shootTypes = Array.from(selected).map(b => b.dataset.type);
   }

@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// LensLedger — Tax Center Module
+// Haus Ledger — Tax Center Module
 // ═══════════════════════════════════════════════════════════════
 
 let _mileageEntries = [];

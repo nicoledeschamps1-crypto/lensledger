@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// LensLedger — Expenses Module
+// Haus Ledger — Expenses Module
 // Handles: manual entry, transaction list, categories, receipts
 // ═══════════════════════════════════════════════════════════════
 

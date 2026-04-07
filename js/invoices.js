@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// LensLedger — Invoices Module
+// Haus Ledger — Invoices Module
 // ═══════════════════════════════════════════════════════════════
 
 let _invoices = [];
@@ -252,7 +252,7 @@ async function createInvoice() {
   }
 
   const year = new Date().getFullYear();
-  const invoiceNumber = `LL-${year}-${Math.random().toString(16).slice(2, 6).toUpperCase()}`;
+  const invoiceNumber = `HL-${year}-${Math.random().toString(16).slice(2, 6).toUpperCase()}`;
 
   const { data: invoice, error } = await sb
     .from('invoices')

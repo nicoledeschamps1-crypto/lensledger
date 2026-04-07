@@ -469,7 +469,7 @@ const mockToday = new Date("2026-04-07T12:00:00-04:00");
         }
       });
 
-      document.title = `LensLedger | ${targetId.replace("-", " ").replace(/\b\w/g, (char) => char.toUpperCase())}`;
+      document.title = `Haus Ledger | ${targetId.replace("-", " ").replace(/\b\w/g, (char) => char.toUpperCase())}`;
       document.querySelector(".main-area").scrollTo({ top: 0, behavior: "smooth" });
       speak(`${targetId.replace("-", " ")} section open`);
     }

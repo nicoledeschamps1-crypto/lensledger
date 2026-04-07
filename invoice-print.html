@@ -150,7 +150,7 @@
   <div class="brand">
     <img id="businessLogo" class="brand-logo" style="display:none;" alt="Business logo">
     <div>
-      <div class="brand-name" id="businessName">LensLedger</div>
+      <div class="brand-name" id="businessName">Haus Ledger</div>
       <div class="brand-sub" id="businessEmail"></div>
     </div>
   </div>
@@ -239,7 +239,7 @@
     document.getElementById('invoiceNumber').textContent = inv.invoice_number;
     document.getElementById('fromName').textContent = profile?.business_name || profile?.full_name || session.user.email;
     document.getElementById('fromDetails').textContent = profile?.email || session.user.email;
-    document.getElementById('businessName').textContent = profile?.business_name || profile?.full_name || 'LensLedger';
+    document.getElementById('businessName').textContent = profile?.business_name || profile?.full_name || 'Haus Ledger';
     document.getElementById('businessEmail').textContent = profile?.email || '';
 
     document.getElementById('toName').textContent = inv.client?.name || 'Client';

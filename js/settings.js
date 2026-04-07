@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// LensLedger — Settings Module
+// Haus Ledger — Settings Module
 // ═══════════════════════════════════════════════════════════════
 
 let _settingsInitialized = false;

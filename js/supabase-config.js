@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// LensLedger — Supabase Configuration
+// Haus Ledger — Supabase Configuration
 // Replace these with your Supabase project values from:
 // Supabase Dashboard → Settings → API
 // ═══════════════════════════════════════════════════════════════

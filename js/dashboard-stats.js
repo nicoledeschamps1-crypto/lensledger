@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// LensLedger — Dashboard Stats Module
+// Haus Ledger — Dashboard Stats Module
 // Renders live data on the main Dashboard section
 // ═══════════════════════════════════════════════════════════════
 
